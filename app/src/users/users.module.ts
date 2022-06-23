@@ -1,4 +1,4 @@
-import {Module} from '@nestjs/common';
+import {MiddlewareConsumer, Module} from '@nestjs/common';
 import {UsersController} from './controllers/users.controller';
 import {UsersService} from "./services/users.service";
 import {MongooseModule} from "@nestjs/mongoose";
@@ -6,6 +6,7 @@ import {User, UserSchema} from "./models/user";
 import {randomBytes, scrypt as _scrypt} from "crypto";
 import {promisify} from "util";
 import {Buffer} from "buffer";
+import {CurrentUserMiddleware} from "./middleware/current-user.middleware";
 
 // native scrypt doesn't work with promise
 const scrypt = promisify(_scrypt);
@@ -36,4 +37,7 @@ const scrypt = promisify(_scrypt);
     exports: [UsersService]
 })
 export class UsersModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(CurrentUserMiddleware).forRoutes('*');
+    }
 }

@@ -29,8 +29,9 @@ export class CreateUserDTO {
     @MaxLength(30)
     password: string;
 
-    @Matches(/((00)?\+?[389]{3})?[\/\-\s*\.]?(((\(0\))|0)?\s*7\d{1})[\/\-\s*\.\,]?([\d]{3})[\/\-\s*\.\,]?([\d]{3})/g, {
-        message: 'Please enter a valid mobile number.'
+    @Matches(/((00)?\+?[389]{3})?[\/\-\s*\.]?(((\(0\))|0)?\s*7\d{1})[\/\-\s*\.\,]?([\d]{3})[\/\-\s*\.\,]?([\d]{3})/, {
+        message: 'Please enter a valid phone number.'
     })
-    phone: number;
+    @IsString()
+    phone: string;
 }
