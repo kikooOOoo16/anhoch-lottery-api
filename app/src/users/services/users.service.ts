@@ -29,7 +29,7 @@ export class UsersService {
         }
     }
 
-    async update(user: UserDocument, updateUserDTO: Partial<UpdateUserDTO>) {
+    async update(user: UserDocument, updateUserDTO: Partial<UpdateUserDTO>): Promise<UserDocument> {
         HelperService.checkIfObjectIsEmpty(updateUserDTO);
 
         Object.assign(user, updateUserDTO);

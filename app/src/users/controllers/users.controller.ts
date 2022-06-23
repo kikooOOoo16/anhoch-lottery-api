@@ -1,10 +1,12 @@
-import {Body, Controller, Get, Param, Patch, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Param, Patch, UseGuards, UseInterceptors} from '@nestjs/common';
 import {UsersService} from "../services/users.service";
 import {CurrentUser} from "../decorators/current-user.decorator";
 import {UserDocument} from "../models/user";
 import {AnyActiveSessionGuard} from "../../guards/any-active-session.guard";
 import {UserActiveSessionGuard} from "../../guards/user-active-session.guard";
 import {UpdateUserDTO} from "../dtos/update-user.dto";
+import {UserDTO} from "../dtos/user.dto";
+import {SerializeDataInterceptor} from "../../interceptors/serialize-data.interceptor";
 
 @Controller('user')
 export class UsersController {
@@ -14,20 +16,22 @@ export class UsersController {
 
     @Get()
     @UseGuards(UserActiveSessionGuard)
-    async getUserData(@CurrentUser() user: UserDocument) {
+    @UseInterceptors(new SerializeDataInterceptor(UserDTO))
+    async getUserData(@CurrentUser() user: UserDocument): Promise<UserDocument> {
         return user;
     }
 
     @Get('/:id')
     @UseGuards(AnyActiveSessionGuard)
-    async getUserProfileData(@Param('id') userId: string) {
+    @UseInterceptors(new SerializeDataInterceptor(UserDTO))
+    async getUserProfileData(@Param('id') userId: string): Promise<UserDocument> {
         return await this.usersService.findById(userId);
     }
 
     @Patch()
     @UseGuards(UserActiveSessionGuard)
-    async updateUserData(@CurrentUser() user: UserDocument, @Body() updateUserDTO: UpdateUserDTO) {
+    @UseInterceptors(new SerializeDataInterceptor(UserDTO))
+    async updateUserData(@CurrentUser() user: UserDocument, @Body() updateUserDTO: UpdateUserDTO): Promise<UserDocument> {
         return await this.usersService.update(user, updateUserDTO);
     }
-
 }
