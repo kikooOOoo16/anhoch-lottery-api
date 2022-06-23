@@ -6,11 +6,15 @@ import {CreateUserDTO} from "../dtos/create-user.dto";
 import {ProblemCreatingNewUserException} from "../../exceptions/user-related/problem-creating-new-user.exception";
 import {ProblemRetrievingUserDataException} from "../../exceptions/user-related/problem-retrieving-user-data.exception";
 import {NoUserFoundException} from "../../exceptions/user-related/no-user-found.exception";
+import {HelperService} from "../../common/services/helper.service";
+import {UpdateUserDTO} from "../dtos/update-user.dto";
+import {ProblemUpdatingUserDataException} from "../../exceptions/user-related/problem-updating-user-data.exception";
 
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {}
+    constructor(
+        @InjectModel('User') private readonly userModel: Model<UserDocument>) {}
 
     async create(createUserDTO: CreateUserDTO): Promise<UserDocument> {
         const newUser = new this.userModel(createUserDTO);
@@ -19,7 +23,24 @@ export class UsersService {
             return await newUser.save();
         } catch (e) {
             Logger.error(e, 'users.service.ts: create()');
+            HelperService.handleDuplicateKeyErr(e);
+
             throw new ProblemCreatingNewUserException();
+        }
+    }
+
+    async update(user: UserDocument, updateUserDTO: Partial<UpdateUserDTO>) {
+        HelperService.checkIfObjectIsEmpty(updateUserDTO);
+
+        Object.assign(user, updateUserDTO);
+
+        try {
+            return await this.userModel.findByIdAndUpdate(user.id, {...user}, {new: true});
+        } catch (e) {
+            Logger.error(e, 'users.service.ts: update()');
+            HelperService.handleDuplicateKeyErr(e);
+
+            throw new ProblemUpdatingUserDataException();
         }
     }
 
@@ -37,5 +58,14 @@ export class UsersService {
         }
 
         return user;
+    }
+
+    async findById(id: string): Promise<UserDocument> {
+        try {
+            return await this.userModel.findById(id);
+        } catch (e) {
+            Logger.error(e, 'users.service.ts: findByEmail()');
+            throw new ProblemRetrievingUserDataException();
+        }
     }
 }

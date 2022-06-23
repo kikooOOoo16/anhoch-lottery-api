@@ -6,6 +6,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 import {AuthModule} from './auth/auth.module';
 import {APP_PIPE} from "@nestjs/core";
 import {UsersModule} from './users/users.module';
+import {CommonModule} from "./common/common.module";
 
 const cookieSession = require('cookie-session');
 
@@ -21,7 +22,8 @@ const configModuleOptions = {
             dbName: process.env.MONGO_DB_NAME
         }),
         AuthModule,
-        UsersModule
+        UsersModule,
+        CommonModule
     ],
     controllers: [AppController],
     providers: [
