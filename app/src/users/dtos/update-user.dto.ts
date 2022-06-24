@@ -5,13 +5,13 @@ export class UpdateUserDTO {
     @IsString()
     @MinLength(3)
     @MaxLength(40)
-    firstname: string;
+    firstName: string;
 
     @IsOptional()
     @IsString()
     @MinLength(3)
     @MaxLength(40)
-    lastname: string;
+    lastName: string;
 
     @IsOptional()
     @IsString()
