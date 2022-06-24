@@ -4,12 +4,12 @@ export class CreateUserDTO {
     @IsString()
     @MinLength(3)
     @MaxLength(40)
-    firstname: string;
+    firstName: string;
 
     @IsString()
     @MinLength(3)
     @MaxLength(40)
-    lastname: string;
+    lastName: string;
 
     @IsString()
     @MinLength(3)

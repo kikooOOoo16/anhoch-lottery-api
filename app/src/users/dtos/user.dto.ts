@@ -5,10 +5,10 @@ export class UserDTO {
     _id: string;
 
     @Expose()
-    firstname: string;
+    firstName: string;
 
     @Expose()
-    lastname: string;
+    lastName: string;
 
     @Expose()
     email: string;
