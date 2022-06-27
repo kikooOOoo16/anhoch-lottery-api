@@ -24,4 +24,8 @@ export class HelperService {
             throw new MissingRequestDataException();
         }
     }
+
+    public static convertToTimestamp(day: number, month: number, year: number): number {
+        return new Date(year, month-1, day).getTime();
+    }
 }

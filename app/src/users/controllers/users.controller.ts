@@ -1,7 +1,7 @@
 import {Body, Controller, Get, Param, Patch, UseGuards, UseInterceptors} from '@nestjs/common';
 import {UsersService} from "../services/users.service";
 import {CurrentUser} from "../decorators/current-user.decorator";
-import {UserDocument} from "../models/user";
+import {UserDocument} from "../models/user.model";
 import {AnyActiveSessionGuard} from "../../guards/any-active-session.guard";
 import {UserActiveSessionGuard} from "../../guards/user-active-session.guard";
 import {UpdateUserDTO} from "../dtos/update-user.dto";

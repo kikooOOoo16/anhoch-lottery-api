@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {UsersService} from "../../users/services/users.service";
 import {SignInDTO} from "../dtos/sign-in.dto";
-import {UserDocument} from "../../users/models/user";
+import {UserDocument} from "../../users/models/user.model";
 import {scrypt as _scrypt} from "crypto";
 import {Buffer} from "buffer";
 import {promisify} from "util";
 import {WrongCredentialsException} from "../../exceptions/auth-related/wrong-credentials.exception";
 import {AdminsService} from "../../admins/services/admins.service";
-import {AdminDocument} from "../../admins/models/admin";
+import {AdminDocument} from "../../admins/models/admin.model";
 
 // native scrypt doesn't work with promise
 const scrypt = promisify(_scrypt);
