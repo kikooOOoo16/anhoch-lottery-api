@@ -2,7 +2,7 @@ import {Injectable, Logger} from '@nestjs/common';
 import {CreateAdminDTO} from "../dtos/create-admin.dto";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
-import {AdminDocument} from "../models/admin";
+import {AdminDocument} from "../models/admin.model";
 import {ProblemCreatingAdminException} from "../../exceptions/admin-related/problem-creating-admin.exception";
 import {WrongMasterPasswordException} from "../../exceptions/admin-related/wrong-master-password.exception";
 import {ProblemRetrievingAdminException} from "../../exceptions/admin-related/problem-retrieving-admin.exception";
@@ -20,13 +20,13 @@ export class AdminsService {
         AdminsService.verifyMasterPassword(masterPassword);
 
         try {
-            const adminModel: AdminDocument = new this.adminModel({
+            const admin: AdminDocument = new this.adminModel({
                 firstName,
                 lastName,
                 email,
                 password
             });
-            return await adminModel.save();
+            return await admin.save();
         } catch (e) {
             Logger.error(e, 'admins.service.ts: create()');
             HelperService.handleDuplicateKeyErr(e);

@@ -2,7 +2,7 @@ import {MiddlewareConsumer, Module} from '@nestjs/common';
 import {UsersController} from './controllers/users.controller';
 import {UsersService} from "./services/users.service";
 import {MongooseModule} from "@nestjs/mongoose";
-import {User, UserSchema} from "./models/user";
+import {User, UserSchema} from "./models/user.model";
 import {randomBytes, scrypt as _scrypt} from "crypto";
 import {promisify} from "util";
 import {Buffer} from "buffer";

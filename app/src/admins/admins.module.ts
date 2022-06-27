@@ -5,7 +5,7 @@ import {MongooseModule} from "@nestjs/mongoose";
 import {randomBytes, scrypt as _scrypt} from "crypto";
 import {Buffer} from "buffer";
 import {promisify} from "util";
-import {AdminSchema} from "./models/admin";
+import {AdminSchema} from "./models/admin.model";
 import {CommonModule} from "../common/common.module";
 import {CurrentAdminMiddleware} from "./middleware/current-admin.middleware";
 

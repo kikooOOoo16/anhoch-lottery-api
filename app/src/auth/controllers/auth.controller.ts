@@ -1,7 +1,7 @@
 import {Body, Controller, Post, Session, UseGuards, UseInterceptors} from '@nestjs/common';
 import {AuthService} from "../services/auth.service";
 import {NoActiveSessionGuard} from "../../guards/no-active-session.guard";
-import {UserDocument} from "../../users/models/user";
+import {UserDocument} from "../../users/models/user.model";
 import {SignInDTO} from "../dtos/sign-in.dto";
 import {AnyActiveSessionGuard} from "../../guards/any-active-session.guard";
 import {CreateUserDTO} from "../../users/dtos/create-user.dto";

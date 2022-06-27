@@ -7,7 +7,7 @@ import {AdminDTO} from "../dtos/admin.dto";
 import {AdminActiveSessionGuard} from "../../guards/admin-active-session.guard";
 import {CurrentAdmin} from "../decorators/current-admin.decorator";
 import {UpdateAdminDTO} from "../dtos/update-admin.dto";
-import {AdminDocument} from "../models/admin";
+import {AdminDocument} from "../models/admin.model";
 
 @Controller('admins')
 export class AdminsController {

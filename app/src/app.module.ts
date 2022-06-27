@@ -8,6 +8,7 @@ import {APP_PIPE} from "@nestjs/core";
 import {UsersModule} from './users/users.module';
 import {CommonModule} from "./common/common.module";
 import { AdminsModule } from './admins/admins.module';
+import { GamesModule } from './games/games.module';
 
 const cookieSession = require('cookie-session');
 
@@ -25,7 +26,8 @@ const configModuleOptions = {
         AuthModule,
         UsersModule,
         CommonModule,
-        AdminsModule
+        AdminsModule,
+        GamesModule
     ],
     controllers: [AppController],
     providers: [
