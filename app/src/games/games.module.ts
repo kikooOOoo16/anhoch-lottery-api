@@ -8,15 +8,20 @@ import {GamesFindService} from "./services/games-find.service";
 import {GamesActivePoolService} from "./services/games-active-pool.service";
 import {CommonModule} from "../common/common.module";
 import {GamesActiveDateService} from "./services/games-active-date.service";
+import {GamesSessionService} from "./services/games-session.service";
+import {ActiveGameSessionSchema} from "./models/active-game-session.model";
+import {UsersModule} from "../users/users.module";
 
 @Module({
     imports: [
         MongooseModule.forFeature(
             [
                 {name: 'Game', schema: GameSchema},
-                {name: 'ActiveDate', schema: ActiveDateSchema}
+                {name: 'ActiveDate', schema: ActiveDateSchema},
+                {name: 'ActiveGameSession', schema: ActiveGameSessionSchema}
             ]
         ),
+        UsersModule,
         CommonModule,
     ],
     controllers: [GamesController],
@@ -24,7 +29,8 @@ import {GamesActiveDateService} from "./services/games-active-date.service";
         GamesService,
         GamesFindService,
         GamesActivePoolService,
-        GamesActiveDateService
+        GamesActiveDateService,
+        GamesSessionService
     ]
 })
 export class GamesModule {

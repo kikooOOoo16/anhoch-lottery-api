@@ -1,18 +1,23 @@
 import {Injectable, Logger} from "@nestjs/common";
-import {GameDocument} from "../models/game.model";
+import {Game, GameDocument} from "../models/game.model";
 import {ProblemRetrievingGameException} from "../../exceptions/game-related/problem-retrieving-game.exception";
 import {NoGameFoundException} from "../../exceptions/game-related/no-game-found.exception";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {ProblemRetrievingAllGamesException} from "../../exceptions/game-related/problem-retrieving-all-games.exception";
 import {ProblemRetrievingActivePoolGamesException} from "../../exceptions/game-related/active-game-pool/problem-retrieving-active-pool-games.exception";
+import {NoActiveGameFoundForTodayException} from "../../exceptions/game-related/active-date/no-active-game-found-for-today.exception";
+import {HelperService} from "../../common/services/helper.service";
+import {ActiveDateDocument} from "../models/active-date.model";
 
 @Injectable()
 export class GamesFindService {
 
-    constructor(@InjectModel('Game') private readonly gameModel: Model<GameDocument>) {}
+    constructor(@InjectModel('Game') private readonly gameModel: Model<GameDocument>,
+                @InjectModel('ActiveDate') private readonly activeDateModel: Model<ActiveDateDocument>) {
+    }
 
-    async findById(id: string): Promise<GameDocument> {
+    async findById(id: string | Game): Promise<GameDocument> {
         let game: GameDocument;
         try {
             game = await this.gameModel
@@ -53,5 +58,22 @@ export class GamesFindService {
             Logger.error(e, 'games.service.ts: getAllActivePoolGames()');
             throw new ProblemRetrievingActivePoolGamesException();
         }
+    }
+
+    async findActiveGameForToday(): Promise<Game> {
+        let activeDate: ActiveDateDocument;
+        const currentDateTimestamp = HelperService.getCurrentDateTimestamp();
+
+        try {
+            activeDate = await this.activeDateModel
+                .findOne({
+                    date: currentDateTimestamp
+                });
+        } catch (e) {
+            Logger.error(e, 'games-find.service: findActiveGameForToday');
+            throw new NoActiveGameFoundForTodayException();
+        }
+
+        return await this.findById(activeDate.game);
     }
 }

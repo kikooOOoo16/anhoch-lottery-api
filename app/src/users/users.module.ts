@@ -31,7 +31,8 @@ const scrypt = promisify(_scrypt);
                 });
                 return schema;
             }
-        }])],
+        }]),
+    ],
     controllers: [UsersController],
     providers: [UsersService],
     exports: [UsersService]

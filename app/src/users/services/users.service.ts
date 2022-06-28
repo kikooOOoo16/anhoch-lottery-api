@@ -9,6 +9,7 @@ import {NoUserFoundException} from "../../exceptions/user-related/no-user-found.
 import {HelperService} from "../../common/services/helper.service";
 import {UpdateUserDTO} from "../dtos/update-user.dto";
 import {ProblemUpdatingUserDataException} from "../../exceptions/user-related/problem-updating-user-data.exception";
+import {ProblemUpdatingPlayedTodayStatusException} from "../../exceptions/user-related/problem-updating-played-today-status.exception";
 
 @Injectable()
 export class UsersService {
@@ -41,6 +42,24 @@ export class UsersService {
 
             throw new ProblemUpdatingUserDataException();
         }
+    }
+
+    async modifyPlayedTodayStatus(user: UserDocument, playedToday: boolean) {
+        let updatedUser: UserDocument;
+        try {
+            updatedUser = await this.userModel.findByIdAndUpdate(user.id, {
+                playedToday
+            }, {new: true})
+        } catch (e) {
+            Logger.error(e, 'users.service.ts: modifyPlayedTodayStatus');
+            throw new ProblemUpdatingPlayedTodayStatusException();
+        }
+
+        if (!updatedUser) {
+            throw new NoUserFoundException();
+        }
+
+        return updatedUser;
     }
 
     async findByEmail(email: string): Promise<UserDocument> {
