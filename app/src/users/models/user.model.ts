@@ -32,6 +32,11 @@ export class User {
         unique: true
     })
     phone: string;
+
+    @Prop({
+        default: false
+    })
+    playedToday: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
