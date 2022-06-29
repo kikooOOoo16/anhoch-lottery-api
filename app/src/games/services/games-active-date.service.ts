@@ -14,11 +14,14 @@ import {Model} from "mongoose";
 import {GamesFindService} from "./games-find.service";
 import {HelperService} from "../../common/services/helper.service";
 import {GamesLeaderboardsService} from "./games-leaderboards.service";
+import {GameLeaderboardDocument} from "../models/game-leaderboard.model";
+import {GamesService} from "./games.service";
 
 @Injectable()
 export class GamesActiveDateService {
 
     constructor(@InjectModel('ActiveDate') private readonly  activeDateModel: Model<ActiveDateDocument>,
+                private gamesService: GamesService,
                 private gamesFindService: GamesFindService,
                 private gamesLeaderboardsService: GamesLeaderboardsService) {
     }
@@ -73,7 +76,9 @@ export class GamesActiveDateService {
             throw new ProblemSettingActiveDateForGameException();
         }
 
-        await this.gamesLeaderboardsService.createLeaderboardForGame(game, dateTimestamp);
+        const gameLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.createLeaderboardForGame(game, dateTimestamp);
+
+        await this.gamesService.addLeaderboardToGameLeaderboardsList(game, gameLeaderboard);
 
         return savedActiveDate;
     }
@@ -103,7 +108,9 @@ export class GamesActiveDateService {
             throw new NoActiveDateFoundException();
         }
 
-        await this.gamesLeaderboardsService.deleteLeaderboardForGame(game, dateTimestamp);
+        const deletedLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.deleteLeaderboardForGame(game, dateTimestamp);
+
+        await this.gamesService.removeLeaderboardFromGame(game, deletedLeaderboard);
 
         return activeDate;
     }

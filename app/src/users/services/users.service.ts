@@ -10,11 +10,13 @@ import {HelperService} from "../../common/services/helper.service";
 import {UpdateUserDTO} from "../dtos/update-user.dto";
 import {ProblemUpdatingUserDataException} from "../../exceptions/user-related/problem-updating-user-data.exception";
 import {ProblemUpdatingPlayedTodayStatusException} from "../../exceptions/user-related/problem-updating-played-today-status.exception";
+import {ProblemRetrievingUsersException} from "../../exceptions/user-related/problem-retrieving-users.exception";
 
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {}
+    constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {
+    }
 
     async create(createUserDTO: CreateUserDTO): Promise<UserDocument> {
         const newUser: UserDocument = new this.userModel(createUserDTO);
@@ -84,6 +86,15 @@ export class UsersService {
         } catch (e) {
             Logger.error(e, 'users.service.ts: findByEmail()');
             throw new ProblemRetrievingUserDataException();
+        }
+    }
+
+    async findAll(): Promise<UserDocument[]> {
+        try {
+            return await this.userModel.find();
+        } catch (e) {
+            Logger.error(e, 'users.service.ts: findAll()');
+            throw new ProblemRetrievingUsersException();
         }
     }
 }

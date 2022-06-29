@@ -30,9 +30,9 @@ export class GamesLeaderboardsService {
         return newLeaderboard;
     }
 
-    async deleteLeaderboardForGame(game: GameDocument, dateTimestamp: number) {
+    async deleteLeaderboardForGame(game: GameDocument, dateTimestamp: number): Promise<GameLeaderboardDocument> {
         try {
-            await this.gameLeaderboardModel.findOneAndDelete({
+            return await this.gameLeaderboardModel.findOneAndDelete({
                 game,
                 date: dateTimestamp
             })

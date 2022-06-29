@@ -76,7 +76,7 @@ export class GamesSessionService {
         return userScore;
     }
 
-    async findUserActiveGameSession(user: UserDocument): Promise<ActiveGameSessionDocument> {
+    async findUserActiveGameSession(user: UserDocument, returnEmptySessionRes?: boolean): Promise<ActiveGameSessionDocument> {
         let activeGameSession: ActiveGameSessionDocument;
 
         try {
@@ -86,6 +86,10 @@ export class GamesSessionService {
         } catch (e) {
             Logger.error(e, 'games-session.service.ts');
             throw new ProblemRetrievingSessionException();
+        }
+
+        if (!activeGameSession && returnEmptySessionRes) {
+            return activeGameSession;
         }
 
         if (!activeGameSession) {
