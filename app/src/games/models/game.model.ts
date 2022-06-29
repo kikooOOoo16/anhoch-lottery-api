@@ -2,6 +2,7 @@ import mongoose, {Document} from "mongoose";
 import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
 import {ActiveDate} from "./active-date.model";
 import {Type} from "class-transformer";
+import {GameLeaderboard} from "./game-leaderboard.model";
 
 export type GameDocument = Game & Document;
 
@@ -19,6 +20,10 @@ export class Game {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ActiveDate' })
     @Type(() => ActiveDate)
     activeDates: ActiveDate[];
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'GameLeaderboard'})
+    @Type(() => GameLeaderboard)
+    gameLeaderboards: GameLeaderboard[];
 }
 
 export const GameSchema = SchemaFactory.createForClass(Game);

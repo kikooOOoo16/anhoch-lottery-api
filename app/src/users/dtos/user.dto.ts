@@ -21,4 +21,7 @@ export class UserDTO {
 
     @Expose()
     phone: string;
+
+    @Expose()
+    playedToday: boolean;
 }

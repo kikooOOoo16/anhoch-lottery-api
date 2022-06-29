@@ -9,6 +9,7 @@ import {ProblemRetrievingActivePoolGamesException} from "../../exceptions/game-r
 import {NoActiveGameFoundForTodayException} from "../../exceptions/game-related/active-date/no-active-game-found-for-today.exception";
 import {HelperService} from "../../common/services/helper.service";
 import {ActiveDateDocument} from "../models/active-date.model";
+import {ProblemRetrievingActiveGameForTodayException} from "../../exceptions/game-related/active-date/problem-retrieving-active-game-for-today.exception";
 
 @Injectable()
 export class GamesFindService {
@@ -25,7 +26,7 @@ export class GamesFindService {
                 .populate('activeDates')
                 .exec();
         } catch (e) {
-            Logger.error(e, 'games.service.ts: create()');
+            Logger.error(e, 'games-find.service: create()');
             throw new ProblemRetrievingGameException();
         }
 
@@ -43,7 +44,7 @@ export class GamesFindService {
                 .populate('activeDates')
                 .exec();
         } catch (e) {
-            Logger.error(e, 'games.service.ts: create()');
+            Logger.error(e, 'games-find.service: create()');
             throw new ProblemRetrievingAllGamesException();
         }
     }
@@ -55,12 +56,12 @@ export class GamesFindService {
                     inActivePool
                 });
         } catch (e) {
-            Logger.error(e, 'games.service.ts: getAllActivePoolGames()');
+            Logger.error(e, 'games-find.service: getAllActivePoolGames()');
             throw new ProblemRetrievingActivePoolGamesException();
         }
     }
 
-    async findActiveGameForToday(): Promise<Game> {
+    async findActiveGameForToday(): Promise<GameDocument> {
         let activeDate: ActiveDateDocument;
         const currentDateTimestamp = HelperService.getCurrentDateTimestamp();
 
@@ -71,6 +72,10 @@ export class GamesFindService {
                 });
         } catch (e) {
             Logger.error(e, 'games-find.service: findActiveGameForToday');
+            throw new ProblemRetrievingActiveGameForTodayException();
+        }
+
+        if (!activeDate) {
             throw new NoActiveGameFoundForTodayException();
         }
 
