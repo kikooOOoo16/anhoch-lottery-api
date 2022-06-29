@@ -11,6 +11,12 @@ import {NoActiveSessionFoundException} from "../../exceptions/user-related/user-
 import {ProblemDeletingActiveGameSessionException} from "../../exceptions/user-related/user-game-session/problem-deleting-active-game-session.exception";
 import {UsersService} from "../../users/services/users.service";
 import {CanNotPlayMoreThanOnceOnTheSameDayException} from "../../exceptions/user-related/user-game-session/can-not-play-more-than-once-on-the-same-day.exception";
+import {UserScoreDocument} from "../models/user-score.model";
+import {GameLeaderboardDocument} from "../models/game-leaderboard.model";
+import {GamesLeaderboardsService} from "./games-leaderboards.service";
+import {HelperService} from "../../common/services/helper.service";
+import {GamesUsersScoreService} from "./games-users-score.service";
+import {GamesLeaderboardsFindService} from "./games-leaderboards-find.service";
 
 @Injectable()
 export class GamesSessionService {
@@ -18,8 +24,11 @@ export class GamesSessionService {
     constructor(
         private gamesFindService: GamesFindService,
         private usersService: UsersService,
-        @InjectModel('ActiveGameSession') private readonly activeGameSessionModel: Model<ActiveGameSessionDocument>) {
-    }
+        private gamesLeaderboardsService: GamesLeaderboardsService,
+        private gamesUsersScoreService: GamesUsersScoreService,
+        private gamesLeaderboardsFindService: GamesLeaderboardsFindService,
+        @InjectModel('ActiveGameSession') private readonly activeGameSessionModel: Model<ActiveGameSessionDocument>,
+        @InjectModel('UserScore') private readonly userScoreModel: Model<UserScoreDocument>) {}
 
     async startSession(user: UserDocument): Promise<ActiveGameSessionDocument> {
         let activeGameSession: ActiveGameSessionDocument;
@@ -50,8 +59,9 @@ export class GamesSessionService {
         return activeGameSession;
     }
 
-    async stopSession(user: UserDocument) {
+    async stopSession(user: UserDocument): Promise<UserScoreDocument> {
         const activeGameSession: ActiveGameSessionDocument = await this.findUserActiveGameSession(user);
+        const gameLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsFindService.findLeaderboardByDateForGame(activeGameSession.game, HelperService.getCurrentDateTimestamp());
 
         const endTimestamp: number = new Date().getTime();
 
@@ -59,7 +69,11 @@ export class GamesSessionService {
 
         await this.deleteActiveGameSession(user);
 
-        return timeFinished;
+        const userScore: UserScoreDocument = await this.gamesUsersScoreService.createUserScore(user, gameLeaderboard, timeFinished);
+
+        await this.gamesLeaderboardsService.addScoreToLeaderboard(gameLeaderboard, userScore);
+
+        return userScore;
     }
 
     async findUserActiveGameSession(user: UserDocument): Promise<ActiveGameSessionDocument> {

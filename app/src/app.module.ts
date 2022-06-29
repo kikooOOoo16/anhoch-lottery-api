@@ -9,6 +9,7 @@ import {UsersModule} from './users/users.module';
 import {CommonModule} from "./common/common.module";
 import { AdminsModule } from './admins/admins.module';
 import { GamesModule } from './games/games.module';
+import {ScheduleModule} from "@nestjs/schedule";
 
 const cookieSession = require('cookie-session');
 
@@ -23,6 +24,7 @@ const configModuleOptions = {
         MongooseModule.forRoot(process.env.MONGO_DB_URL, {
             dbName: process.env.MONGO_DB_NAME
         }),
+        ScheduleModule.forRoot(),
         AuthModule,
         UsersModule,
         CommonModule,

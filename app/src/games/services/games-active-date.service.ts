@@ -13,12 +13,14 @@ import {InjectModel} from "@nestjs/mongoose";
 import {Model} from "mongoose";
 import {GamesFindService} from "./games-find.service";
 import {HelperService} from "../../common/services/helper.service";
+import {GamesLeaderboardsService} from "./games-leaderboards.service";
 
 @Injectable()
 export class GamesActiveDateService {
 
     constructor(@InjectModel('ActiveDate') private readonly  activeDateModel: Model<ActiveDateDocument>,
-                private gamesFindService: GamesFindService) {
+                private gamesFindService: GamesFindService,
+                private gamesLeaderboardsService: GamesLeaderboardsService) {
     }
 
     async findIfAnyGameIsActiveOnDate(game: GameDocument, timestamp): Promise<void> {
@@ -47,6 +49,7 @@ export class GamesActiveDateService {
 
     async setActiveDate(id, {day, month, year}: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
         const game: GameDocument = await this.gamesFindService.findById(id);
+        let savedActiveDate: ActiveDateDocument;
 
         if (!game.inActivePool) {
             throw new SelectedGameNotInActivePoolException();
@@ -64,11 +67,15 @@ export class GamesActiveDateService {
         });
 
         try {
-            return await activeDate.save();
+            savedActiveDate = await activeDate.save();
         } catch (e) {
             Logger.error(e, 'games.service.ts: setActiveDate()');
             throw new ProblemSettingActiveDateForGameException();
         }
+
+        await this.gamesLeaderboardsService.createLeaderboardForGame(game, dateTimestamp);
+
+        return savedActiveDate;
     }
 
     async removeActiveDate(id, {day, month, year}: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
@@ -95,6 +102,8 @@ export class GamesActiveDateService {
         if (!activeDate) {
             throw new NoActiveDateFoundException();
         }
+
+        await this.gamesLeaderboardsService.deleteLeaderboardForGame(game, dateTimestamp);
 
         return activeDate;
     }

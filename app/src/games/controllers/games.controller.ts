@@ -17,6 +17,12 @@ import {GamesSessionService} from "../services/games-session.service";
 import {ActiveGameSessionDocument} from "../models/active-game-session.model";
 import {SerializeDataInterceptor} from "../../interceptors/serialize-data.interceptor";
 import {ActiveGameSessionDTO} from "../dtos/active-game-session.dto";
+import {GamesLeaderboardsService} from "../services/games-leaderboards.service";
+import {GameLeaderboardDocument} from "../models/game-leaderboard.model";
+import {DateTimestampDTO} from "../dtos/date-timestamp.dto";
+import {UserScoreDocument} from "../models/user-score.model";
+import {GameUserScoreDTO} from "../dtos/game-user-score.dto";
+import {GamesLeaderboardsFindService} from "../services/games-leaderboards-find.service";
 
 @Controller('game')
 export class GamesController {
@@ -26,7 +32,9 @@ export class GamesController {
         private gamesFindService: GamesFindService,
         private gamesActivePoolService: GamesActivePoolService,
         private gamesActiveDateService: GamesActiveDateService,
-        private gamesSessionService: GamesSessionService) {}
+        private gamesSessionService: GamesSessionService,
+        private gamesLeaderboardsService: GamesLeaderboardsService,
+        private gamesLeaderboardsFindService: GamesLeaderboardsFindService) {}
 
     @Post()
     @UseGuards(AdminActiveSessionGuard)
@@ -91,7 +99,32 @@ export class GamesController {
 
     @Post('/stop')
     @UseGuards(UserActiveSessionGuard)
-    async stopGameSession(@CurrentUser() user: UserDocument) {
+    @UseInterceptors(new SerializeDataInterceptor(GameUserScoreDTO))
+    async stopGameSession(@CurrentUser() user: UserDocument): Promise<UserScoreDocument> {
         return await this.gamesSessionService.stopSession(user);
+    }
+
+    @Get('/active-today/leaderboard')
+    @UseGuards(AnyActiveSessionGuard)
+    async getTodayActiveGameLeaderboard(): Promise<GameLeaderboardDocument> {
+        return await this.gamesLeaderboardsFindService.findLeaderboardForTodayActiveGame();
+    }
+
+    @Get('/:id/leaderboard')
+    @UseGuards(AnyActiveSessionGuard)
+    async getGameLeaderboardForDate(@Param('id') gameId, @Body() {dateTimestamp}: DateTimestampDTO) {
+        return await this.gamesLeaderboardsFindService.findLeaderboardByDateByGameId(gameId, dateTimestamp);
+    }
+
+    @Get('/:id/leaderboard/all')
+    @UseGuards(AnyActiveSessionGuard)
+    async getAllLeaderboardsForGame(@Param('id') gameId) {
+        return await this.gamesLeaderboardsFindService.findAllLeaderboardsForGame(gameId);
+    }
+
+    @Get('/leaderboard/user/all')
+    @UseGuards(UserActiveSessionGuard)
+    async getAllLeaderboardsWhereUserIsRanked(@CurrentUser() user: UserDocument) {
+        return await this.gamesLeaderboardsFindService.findAllLeaderboardsWhereUserHasPlayed(user);
     }
 }
