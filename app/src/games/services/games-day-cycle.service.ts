@@ -1,27 +1,29 @@
 import {Injectable} from "@nestjs/common";
 import {Cron, CronExpression} from "@nestjs/schedule";
-import {GamesFindService} from "./games-find.service";
-import {GameDocument} from "../models/game.model";
-import {GamesLeaderboardsService} from "./games-leaderboards.service";
+import {UsersService} from "../../users/services/users.service";
+import {UserDocument} from "../../users/models/user.model";
+import {GamesSessionService} from "./games-session.service";
 
 @Injectable()
 export class GamesDayCycleService {
 
     constructor(
-        private gamesFindService: GamesFindService,
-        private gamesLeaderboardsService: GamesLeaderboardsService) {}
+        private usersService: UsersService,
+        private gamesSessionService: GamesSessionService) {}
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async handleActiveGameCycle() {
-        const activeGame: GameDocument = await this.gamesFindService.findActiveGameForToday();
 
-        // close any leftover active game sessions
+        const users: UserDocument[] = await this.usersService.findAll();
 
-        // set user played_today value to false
+        for (const user of users) {
+            await this.usersService.modifyPlayedTodayStatus(user, false);
 
-        if (activeGame) {
-            // check if game has a leaderboard for the date if not create one
-            // await this.gamesLeaderboardsService.createLeaderboardForGame(activeGame);
+            const activeGameSession = await this.gamesSessionService.findUserActiveGameSession(user, true);
+
+            if (activeGameSession) {
+                await this.gamesSessionService.stopSession(user);
+            }
         }
     }
 }

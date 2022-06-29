@@ -21,7 +21,7 @@ export class Game {
     @Type(() => ActiveDate)
     activeDates: ActiveDate[];
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'GameLeaderboard'})
+    @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'GameLeaderboard'})
     @Type(() => GameLeaderboard)
     gameLeaderboards: GameLeaderboard[];
 }
