@@ -7,15 +7,19 @@ import {AuthModule} from './auth/auth.module';
 import {APP_PIPE} from "@nestjs/core";
 import {UsersModule} from './users/users.module';
 import {CommonModule} from "./common/common.module";
-import { AdminsModule } from './admins/admins.module';
-import { GamesModule } from './games/games.module';
+import {AdminsModule} from './admins/admins.module';
+import {GamesModule} from './games/games.module';
 import {ScheduleModule} from "@nestjs/schedule";
+import * as Joi from '@hapi/joi';
 
 const cookieSession = require('cookie-session');
 
 const configModuleOptions = {
     isGlobal: true,
-    envFilePath: `.env.${process.env.NODE_ENV}`
+    envFilePath: `.env.${process.env.NODE_ENV}`,
+    validationSchema: Joi.object({
+        UPLOADED_FILES_DESTINATION: Joi.string().required(),
+    })
 }
 
 @Module({

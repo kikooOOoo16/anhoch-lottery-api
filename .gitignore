@@ -1,6 +1,9 @@
 # IDE files
 .idea
 
+# uploads files
+uploads
+
 # Logs
 logs
 *.log

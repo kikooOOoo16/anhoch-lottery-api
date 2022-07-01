@@ -7,34 +7,44 @@ import {randomBytes, scrypt as _scrypt} from "crypto";
 import {promisify} from "util";
 import {Buffer} from "buffer";
 import {CurrentUserMiddleware} from "./middleware/current-user.middleware";
+import {ProfileImageSchema} from "./models/profile-image.model";
+import {UsersImagesService} from "./services/users-images.service";
+import {CoverImageSchema} from "./models/cover-image.model";
 
 // native scrypt doesn't work with promise
 const scrypt = promisify(_scrypt);
 
 @Module({
     imports: [
-        MongooseModule.forFeatureAsync([{
-            name: 'User',
-            useFactory: () => {
-                const schema = UserSchema;
-                schema.pre('save', async function (next) {
-                    const user = this;
+        MongooseModule.forFeatureAsync
+        ([
+            {
+                name: 'User',
+                useFactory: () => {
+                    const schema = UserSchema;
+                    schema.pre('save', async function (next) {
+                        const user = this;
 
-                    if (user.isModified('password')) {
-                        const salt = randomBytes(8).toString('hex');
-                        const hash = (await scrypt(user.password, salt, 32)) as Buffer;
+                        if (user.isModified('password')) {
+                            const salt = randomBytes(8).toString('hex');
+                            const hash = (await scrypt(user.password, salt, 32)) as Buffer;
 
-                        user.password = salt + '.' + hash.toString('hex');
+                            user.password = salt + '.' + hash.toString('hex');
 
-                        next();
-                    }
-                });
-                return schema;
-            }
-        }]),
+                            next();
+                        }
+                    });
+                    return schema;
+                }
+            },
+        ]),
+        MongooseModule.forFeature([
+            {name: 'ProfileImage', schema: ProfileImageSchema},
+            {name: 'CoverImage', schema: CoverImageSchema},
+        ])
     ],
     controllers: [UsersController],
-    providers: [UsersService],
+    providers: [UsersService, UsersImagesService],
     exports: [UsersService]
 })
 export class UsersModule {
