@@ -1,7 +1,7 @@
 import {
     BadRequestException,
     Body,
-    Controller,
+    Controller, Delete,
     Get,
     Param,
     Patch,
@@ -84,6 +84,12 @@ export class UsersController {
         return await this.usersService.update(user, updateUserDTO);
     }
 
+    @Delete('/profile-image')
+    @UseGuards(UserActiveSessionGuard)
+    async deleteProfileImage(@CurrentUser() user: UserDocument) {
+        return await this.userImagesService.deleteProfileImage(user);
+    }
+
     @Post('/profile-image')
     @UseGuards(UserActiveSessionGuard)
     @UseInterceptors(LocalFilesInterceptor(profileImageStorageOptions))
@@ -96,6 +102,12 @@ export class UsersController {
     @UseInterceptors(LocalFilesInterceptor(coverImageStorageOptions))
     async uploadCoverImage(@CurrentUser() user: UserDocument, @UploadedFile() file: Express.Multer.File): Promise<CoverImageDocument>  {
         return await this.userImagesService.updateCoverImage(user, file);
+    }
+
+    @Delete('/cover-image')
+    @UseGuards(UserActiveSessionGuard)
+    async deleteCoverImage(@CurrentUser() user: UserDocument) {
+        return await this.userImagesService.deleteCoverImage(user);
     }
 
     @Get('/:id/profile-image')

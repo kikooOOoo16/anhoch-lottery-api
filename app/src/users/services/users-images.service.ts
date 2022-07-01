@@ -22,6 +22,13 @@ import {
 import {
     ProblemRetrievingCoverImageException
 } from "../../exceptions/user-related/user-images/problem-retrieving-cover-image.exception";
+import {
+    ProblemDeletingProfileImageException
+} from "../../exceptions/user-related/user-images/problem-deleting-profile-image.exception";
+import {
+    ProfileImageNotFoundException
+} from "../../exceptions/user-related/user-images/profile-image-not-found.exception";
+import {CoverImageNotFoundException} from "../../exceptions/user-related/user-images/cover-image-not-found.exception";
 
 const fs = require('fs');
 
@@ -37,7 +44,7 @@ export class UsersImagesService {
     async updateProfileImage(user: UserDocument, file: Express.Multer.File): Promise<ProfileImageDocument> {
         let savedUser: UserDocument;
 
-        UsersImagesService.removeOldProfileImage(user);
+        UsersImagesService.removeProfileImageFile(user.profileImage);
 
         user.profileImage = new this.profileImageModel({
             filename: file.filename,
@@ -58,7 +65,7 @@ export class UsersImagesService {
     async updateCoverImage(user: UserDocument, file: Express.Multer.File): Promise<CoverImageDocument> {
         let savedUser: UserDocument;
 
-        UsersImagesService.removeOldCoverImage(user);
+        UsersImagesService.removeCoverImageFile(user.coverImage);
 
         user.coverImage = new this.coverImageModel({
             filename: file.filename,
@@ -106,10 +113,55 @@ export class UsersImagesService {
         }
     }
 
-    private static removeOldProfileImage(user: UserDocument) {
-        if (user.profileImage) {
+    async deleteProfileImage(user: UserDocument): Promise<{message: string}> {
+        if (!user.profileImage) {
+            throw new ProfileImageNotFoundException();
+        }
+
+        const oldProfileImage: ProfileImageDocument = user.profileImage;
+
+        user.profileImage = null;
+
+        try {
+            await user.save();
+        } catch (e) {
+            Logger.error(e, 'users-images.service: deleteProfileImage()');
+            throw new ProblemDeletingProfileImageException();
+        }
+
+        UsersImagesService.removeProfileImageFile(oldProfileImage);
+
+        return {
+            message: 'Profile image removed successfully.'
+        }
+    }
+
+    async deleteCoverImage(user: UserDocument): Promise<{message: string}> {
+        if (!user.coverImage) {
+            throw new CoverImageNotFoundException();
+        }
+
+        const oldCoverImage: CoverImageDocument = user.coverImage;
+
+        user.coverImage = null;
+
+        try {
+            await user.save();
+        } catch (e) {
+            Logger.error(e, 'users-images.service: deleteCoverImage()')
+        }
+
+        UsersImagesService.removeCoverImageFile(oldCoverImage);
+
+        return {
+            message: 'Cover image removed successfully.'
+        }
+    }
+
+    private static removeProfileImageFile(profileImage: ProfileImageDocument) {
+        if (profileImage) {
             try {
-                fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${process.env.PROFILE_IMG_DIR}${user.profileImage.filename}`)
+                fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${process.env.PROFILE_IMG_DIR}${profileImage.filename}`)
             } catch (e) {
                 Logger.error(e, 'users-images.service: removeOldProfileImage');
                 throw new ProblemRemovingOldProfileImageException();
@@ -117,10 +169,10 @@ export class UsersImagesService {
         }
     }
 
-    private static removeOldCoverImage(user: UserDocument) {
-        if (user.coverImage) {
+    private static removeCoverImageFile(coverImage: CoverImageDocument) {
+        if (coverImage) {
             try {
-                fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${process.env.COVER_IMG_DIR}${user.coverImage.filename}`)
+                fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${process.env.COVER_IMG_DIR}${coverImage.filename}`)
             } catch (e) {
                 Logger.error(e, 'users-images.service: removeOldCoverImage');
                 throw new ProblemRemovingOldProfileImageException();
