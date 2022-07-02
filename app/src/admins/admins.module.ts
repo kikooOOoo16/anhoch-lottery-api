@@ -8,6 +8,7 @@ import {promisify} from "util";
 import {AdminSchema} from "./models/admin.model";
 import {CommonModule} from "../common/common.module";
 import {CurrentAdminMiddleware} from "./middleware/current-admin.middleware";
+import {UsersModule} from "../users/users.module";
 
 // native scrypt doesn't work with promise
 const scrypt = promisify(_scrypt);
@@ -34,6 +35,7 @@ const scrypt = promisify(_scrypt);
             }
         },]),
         CommonModule,
+        UsersModule,
     ],
     exports: [AdminsService],
     controllers: [AdminsController],

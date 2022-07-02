@@ -45,7 +45,7 @@ const scrypt = promisify(_scrypt);
     ],
     controllers: [UsersController],
     providers: [UsersService, UsersImagesService],
-    exports: [UsersService]
+    exports: [UsersService, UsersImagesService]
 })
 export class UsersModule {
     configure(consumer: MiddlewareConsumer) {

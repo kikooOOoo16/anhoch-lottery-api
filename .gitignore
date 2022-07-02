@@ -2,7 +2,8 @@
 .idea
 
 # uploads files
-uploads
+cover-images
+profile-images
 
 # Logs
 logs
