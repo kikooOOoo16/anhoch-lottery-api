@@ -1,6 +1,10 @@
 # IDE files
 .idea
 
+# uploads files
+cover-images
+profile-images
+
 # Logs
 logs
 *.log

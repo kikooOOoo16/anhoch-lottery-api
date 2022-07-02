@@ -1,5 +1,7 @@
 import {Document} from "mongoose";
 import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
+import {ProfileImageDocument, ProfileImageSchema} from "./profile-image.model";
+import {CoverImageDocument, CoverImageSchema} from "./cover-image.model";
 
 export type UserDocument = User & Document;
 
@@ -37,6 +39,12 @@ export class User {
         default: false
     })
     playedToday: boolean;
+
+    @Prop({ type: ProfileImageSchema })
+    profileImage: ProfileImageDocument;
+
+    @Prop({ type: CoverImageSchema })
+    coverImage: CoverImageDocument;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,4 +1,14 @@
-import {Body, Controller, Get, Patch, Post, UseGuards, UseInterceptors} from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    Patch,
+    Post,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors
+} from '@nestjs/common';
 import {NoActiveSessionGuard} from "../../guards/no-active-session.guard";
 import {AdminsService} from "../services/admins.service";
 import {CreateAdminDTO} from "../dtos/create-admin.dto";
@@ -8,11 +18,42 @@ import {AdminActiveSessionGuard} from "../../guards/admin-active-session.guard";
 import {CurrentAdmin} from "../decorators/current-admin.decorator";
 import {UpdateAdminDTO} from "../dtos/update-admin.dto";
 import {AdminDocument} from "../models/admin.model";
+import LocalFilesInterceptor from "../../interceptors/local-files.interceptor";
+import {UsersImagesService} from "../../users/services/users-images.service";
 
-@Controller('admins')
+const defaultProfileImageStorageOptions = {
+    fieldName: 'default-profile-image',
+    path: '/default-profile-image',
+    fileFilter: (req, file, callback) => {
+        if (!file.mimetype.includes('image')) {
+            return callback(new BadRequestException('File must be an image'), false);
+        }
+        callback(null, true)
+    },
+    limits: {
+        fileSize: Math.pow(1024, 2)
+    }
+}
+
+const defaultCoverImageStorageOptions = {
+    fieldName: 'default-cover-image',
+    path: '/default-cover-image',
+    fileFilter: (req, file, callback) => {
+        if (!file.mimetype.includes('image')) {
+            return callback(new BadRequestException('File must be an image'), false);
+        }
+        callback(null, true)
+    },
+    limits: {
+        fileSize: Math.pow(1024, 2)
+    }
+}
+
+@Controller('admin')
 export class AdminsController {
 
-    constructor(private adminsService: AdminsService) {}
+    constructor(private adminsService: AdminsService,
+                private usersImagesService: UsersImagesService) {}
 
     @Post('/create')
     @UseGuards(NoActiveSessionGuard)
@@ -33,5 +74,19 @@ export class AdminsController {
     @UseInterceptors(new SerializeDataInterceptor(AdminDTO))
     getCurrentAdminData(@CurrentAdmin() admin: AdminDocument) {
         return admin;
+    }
+
+    @Post('/default-profile-image')
+    @UseGuards(AdminActiveSessionGuard)
+    @UseInterceptors(LocalFilesInterceptor(defaultProfileImageStorageOptions))
+    async updateDefaultProfileImage(@UploadedFile() file: Express.Multer.File) {
+        return await this.usersImagesService.updateDefaultUserProfileImage(file);
+    }
+
+    @Post('/default-cover-image')
+    @UseGuards(AdminActiveSessionGuard)
+    @UseInterceptors(LocalFilesInterceptor(defaultCoverImageStorageOptions))
+    async updateDefaultCoverImage(@UploadedFile() file: Express.Multer.File) {
+        return await this.usersImagesService.updateDefaultCoverImage(file);
     }
 }
