@@ -34,6 +34,7 @@ import {
 import {
     ProblemUpdatingDefaultCoverImageException
 } from "../../exceptions/admin-related/default-images/problem-updating-default-cover-image.exception";
+import {NoImageProvidedException} from "../../exceptions/user-related/user-images/no-image-provided.exception";
 
 const fs = require('fs');
 
@@ -48,8 +49,11 @@ export class UsersImagesService {
 
     async updateProfileImage(user: UserDocument, file: Express.Multer.File): Promise<ProfileImageDocument> {
         let savedUser: UserDocument;
+        const oldProfileImage: ProfileImageDocument = user.profileImage;
 
-        UsersImagesService.removeProfileImageFile(user.profileImage, process.env.PROFILE_IMG_DIR);
+        if (!file) {
+            throw new NoImageProvidedException();
+        }
 
         user.profileImage = new this.profileImageModel({
             filename: file.filename,
@@ -64,13 +68,18 @@ export class UsersImagesService {
             throw new ProblemSavingUserProfileImageException();
         }
 
+        UsersImagesService.removeProfileImageFile(oldProfileImage, process.env.PROFILE_IMG_DIR);
+
         return savedUser.profileImage;
     }
 
     async updateCoverImage(user: UserDocument, file: Express.Multer.File): Promise<CoverImageDocument> {
         let savedUser: UserDocument;
+        const oldCoverImage = user.coverImage;
 
-        UsersImagesService.removeCoverImageFile(user.coverImage, process.env.COVER_IMG_DIR);
+        if (!file) {
+            throw new NoImageProvidedException();
+        }
 
         user.coverImage = new this.coverImageModel({
             filename: file.filename,
@@ -84,6 +93,8 @@ export class UsersImagesService {
             Logger.error(e, 'users-images.service: updateCoverImage()');
             throw new ProblemSavingCoverImageException();
         }
+
+        UsersImagesService.removeCoverImageFile(oldCoverImage, process.env.COVER_IMG_DIR);
 
         return savedUser.coverImage;
     }
@@ -175,6 +186,10 @@ export class UsersImagesService {
         let deletedDefaultImage: ProfileImageDocument;
         let savedDefaultImage: ProfileImageDocument;
 
+        if (!file) {
+            throw new NoImageProvidedException();
+        }
+
         const defaultImage: ProfileImageDocument = new this.profileImageModel({
             filename: file.filename,
             path: file.path,
@@ -199,6 +214,10 @@ export class UsersImagesService {
     async updateDefaultCoverImage(file: Express.Multer.File): Promise<CoverImageDocument> {
         let deletedDefaultCoverImage: CoverImageDocument;
         let savedDefaultCoverImage: CoverImageDocument;
+
+        if (!file) {
+            throw new NoImageProvidedException();
+        }
 
         const defaultCoverImage: CoverImageDocument = new this.coverImageModel({
             filename: file.filename,
@@ -226,7 +245,7 @@ export class UsersImagesService {
             try {
                 fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${profileImageDirectory}${profileImage.filename}`)
             } catch (e) {
-                Logger.error(e, 'users-images.service: removeOldProfileImage');
+                Logger.error(e, 'users-images.service: removeProfileImageFile');
                 throw new ProblemRemovingOldProfileImageException();
             }
         }
@@ -237,7 +256,7 @@ export class UsersImagesService {
             try {
                 fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${coverImageDirectory}${coverImage.filename}`)
             } catch (e) {
-                Logger.error(e, 'users-images.service: removeOldCoverImage');
+                Logger.error(e, 'users-images.service: removeCoverImageFile');
                 throw new ProblemRemovingOldProfileImageException();
             }
         }

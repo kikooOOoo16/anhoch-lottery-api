@@ -2,7 +2,6 @@ import {Injectable, NestMiddleware} from "@nestjs/common";
 import {Request, Response} from "express"
 import {AdminsService} from "../services/admins.service";
 
-
 @Injectable()
 export class CurrentAdminMiddleware implements NestMiddleware {
 

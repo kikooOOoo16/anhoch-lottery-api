@@ -7,11 +7,11 @@ export class HelperService {
 
     public static handleDuplicateKeyErr(e: any): void {
         const DUPLICATE_ERROR_CODE = 11000;
-        let duplicateValues: String[] = [];
+        let duplicateValues: string[] = [];
 
         if (e.code === DUPLICATE_ERROR_CODE) {
 
-            for ( let prop in e.keyValue ) {
+            for ( const prop in e.keyValue ) {
                 duplicateValues.push(prop);
             }
 
