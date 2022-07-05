@@ -1,4 +1,4 @@
-import {Body, Controller, Post, Session, UseGuards, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Post, Req, Session, UseGuards, UseInterceptors} from '@nestjs/common';
 import {AuthService} from "../services/auth.service";
 import {NoActiveSessionGuard} from "../../guards/no-active-session.guard";
 import {UserDocument} from "../../users/models/user.model";
@@ -8,6 +8,7 @@ import {CreateUserDTO} from "../../users/dtos/create-user.dto";
 import {UserDTO} from "../../users/dtos/user.dto";
 import {SerializeDataInterceptor} from "../../interceptors/serialize-data.interceptor";
 import {AdminDTO} from "../../admins/dtos/admin.dto";
+import {AdminDocument} from "../../admins/models/admin.model";
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +29,7 @@ export class AuthController {
     @Post('/signin')
     @UseGuards(NoActiveSessionGuard)
     @UseInterceptors(new SerializeDataInterceptor(UserDTO))
-    async signInUser(@Body() signInDTO: SignInDTO, @Session() session: any) {
+    async signInUser(@Body() signInDTO: SignInDTO, @Session() session: any): Promise<UserDocument> {
         const user = await this.authService.signIn(signInDTO);
 
         session.userId = user.id;
@@ -39,7 +40,7 @@ export class AuthController {
     @Post('/admin/signin')
     @UseGuards(NoActiveSessionGuard)
     @UseInterceptors(new SerializeDataInterceptor(AdminDTO))
-    async signInAdmin(@Body() signInDTO: SignInDTO, @Session() session: any) {
+    async signInAdmin(@Body() signInDTO: SignInDTO, @Session() session: any): Promise<AdminDocument> {
         const admin = await this.authService.signInAdmin(signInDTO);
 
         session.adminId = admin.id;
@@ -49,9 +50,10 @@ export class AuthController {
 
     @Post('/signout')
     @UseGuards(AnyActiveSessionGuard)
-    signOut(@Session() session: any) {
+    signOut(@Session() session: any, @Req() req): {message: string} {
         session.userId = null;
         session.adminId = null;
+        req.session = null;
 
         return {
             message: 'Signed out successfully.',

@@ -4,8 +4,7 @@ import {plainToInstance} from "class-transformer";
 
 export class SerializeDataInterceptor implements NestInterceptor {
 
-    constructor(private dto: any) {
-    }
+    constructor(private dto: any) {}
 
     intercept(context: ExecutionContext, next: CallHandler) {
         return next.handle().pipe(
@@ -16,5 +15,4 @@ export class SerializeDataInterceptor implements NestInterceptor {
             })
         );
     }
-
 }

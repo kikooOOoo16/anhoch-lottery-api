@@ -10,6 +10,7 @@ import {CommonModule} from "./common/common.module";
 import {AdminsModule} from './admins/admins.module';
 import {GamesModule} from './games/games.module';
 import {ScheduleModule} from "@nestjs/schedule";
+import { CommercialsModule } from './commercials/commercials.module';
 import * as Joi from '@hapi/joi';
 
 const cookieSession = require('cookie-session');
@@ -33,7 +34,8 @@ const configModuleOptions = {
         UsersModule,
         CommonModule,
         AdminsModule,
-        GamesModule
+        GamesModule,
+        CommercialsModule
     ],
     controllers: [AppController],
     providers: [

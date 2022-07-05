@@ -1,18 +1,6 @@
 import {Injectable, NestMiddleware} from "@nestjs/common";
-import {UserDocument} from "../models/user.model";
 import {UsersService} from "../services/users.service";
 import {Request, Response} from "express"
-import {AdminDocument} from "../../admins/models/admin.model";
-
-declare global {
-    namespace Express {
-        interface Request {
-            currentAdmin?: AdminDocument;
-            currentUser?: UserDocument;
-            session: any;
-        }
-    }
-}
 
 @Injectable()
 export class CurrentUserMiddleware implements NestMiddleware {

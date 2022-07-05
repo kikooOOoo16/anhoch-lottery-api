@@ -15,8 +15,7 @@ import {ProblemRetrievingUsersException} from "../../exceptions/user-related/pro
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {
-    }
+    constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {}
 
     async create(createUserDTO: CreateUserDTO): Promise<UserDocument> {
         const newUser: UserDocument = new this.userModel(createUserDTO);
