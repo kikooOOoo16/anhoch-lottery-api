@@ -1,8 +1,7 @@
-import {HttpException, HttpStatus} from "@nestjs/common";
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ProfileImageNotFoundException extends HttpException {
-
-    constructor() {
-        super('Profile image not found.', HttpStatus.NOT_FOUND);
-    }
+  constructor() {
+    super('Profile image not found.', HttpStatus.NOT_FOUND);
+  }
 }

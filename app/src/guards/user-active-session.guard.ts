@@ -1,8 +1,8 @@
-import {CanActivate, ExecutionContext} from "@nestjs/common";
+import { CanActivate, ExecutionContext } from '@nestjs/common';
 
 export class UserActiveSessionGuard implements CanActivate {
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
-        return request.session.userId;
-    }
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    return request.session.userId;
+  }
 }

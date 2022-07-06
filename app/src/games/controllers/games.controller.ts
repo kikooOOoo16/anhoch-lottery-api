@@ -1,130 +1,172 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors} from '@nestjs/common';
-import {AdminActiveSessionGuard} from "../../guards/admin-active-session.guard";
-import {GamesService} from "../services/games.service";
-import {CreateGameDTO} from "../dtos/create-game.dto";
-import {ModifyGameActivePoolStatusDTO} from "../dtos/modify-game-active-pool-status.dto";
-import {ModifyActiveGameDateDTO} from "../dtos/modify-active-game-date.dto";
-import {GamesFindService} from "../services/games-find.service";
-import {GamesActivePoolService} from "../services/games-active-pool.service";
-import {GamesActiveDateService} from "../services/games-active-date.service";
-import {UserActiveSessionGuard} from "../../guards/user-active-session.guard";
-import {CurrentUser} from "../../users/decorators/current-user.decorator";
-import {UserDocument} from "../../users/models/user.model";
-import {AnyActiveSessionGuard} from "../../guards/any-active-session.guard";
-import {Game, GameDocument} from "../models/game.model";
-import {ActiveDateDocument} from "../models/active-date.model";
-import {GamesSessionService} from "../services/games-session.service";
-import {ActiveGameSessionDocument} from "../models/active-game-session.model";
-import {SerializeDataInterceptor} from "../../interceptors/serialize-data.interceptor";
-import {ActiveGameSessionDTO} from "../dtos/active-game-session.dto";
-import {GamesLeaderboardsService} from "../services/games-leaderboards.service";
-import {GameLeaderboardDocument} from "../models/game-leaderboard.model";
-import {DateTimestampDTO} from "../dtos/date-timestamp.dto";
-import {UserScoreDocument} from "../models/user-score.model";
-import {GameUserScoreDTO} from "../dtos/game-user-score.dto";
-import {GamesLeaderboardsFindService} from "../services/games-leaderboards-find.service";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { AdminActiveSessionGuard } from '../../guards/admin-active-session.guard';
+import { GamesService } from '../services/games.service';
+import { CreateGameDTO } from '../dtos/create-game.dto';
+import { ModifyGameActivePoolStatusDTO } from '../dtos/modify-game-active-pool-status.dto';
+import { ModifyActiveGameDateDTO } from '../dtos/modify-active-game-date.dto';
+import { GamesFindService } from '../services/games-find.service';
+import { GamesActivePoolService } from '../services/games-active-pool.service';
+import { GamesActiveDateService } from '../services/games-active-date.service';
+import { UserActiveSessionGuard } from '../../guards/user-active-session.guard';
+import { CurrentUser } from '../../users/decorators/current-user.decorator';
+import { UserDocument } from '../../users/models/user.model';
+import { AnyActiveSessionGuard } from '../../guards/any-active-session.guard';
+import { Game, GameDocument } from '../models/game.model';
+import { ActiveDateDocument } from '../models/active-date.model';
+import { GamesSessionService } from '../services/games-session.service';
+import { ActiveGameSessionDocument } from '../models/active-game-session.model';
+import { SerializeDataInterceptor } from '../../interceptors/serialize-data.interceptor';
+import { ActiveGameSessionDTO } from '../dtos/active-game-session.dto';
+import { GamesLeaderboardsService } from '../services/games-leaderboards.service';
+import { GameLeaderboardDocument } from '../models/game-leaderboard.model';
+import { DateTimestampDTO } from '../dtos/date-timestamp.dto';
+import { UserScoreDocument } from '../models/user-score.model';
+import { GameUserScoreDTO } from '../dtos/game-user-score.dto';
+import { GamesLeaderboardsFindService } from '../services/games-leaderboards-find.service';
 
 @Controller('game')
 export class GamesController {
+  constructor(
+    private gamesService: GamesService,
+    private gamesFindService: GamesFindService,
+    private gamesActivePoolService: GamesActivePoolService,
+    private gamesActiveDateService: GamesActiveDateService,
+    private gamesSessionService: GamesSessionService,
+    private gamesLeaderboardsService: GamesLeaderboardsService,
+    private gamesLeaderboardsFindService: GamesLeaderboardsFindService,
+  ) {}
 
-    constructor(
-        private gamesService: GamesService,
-        private gamesFindService: GamesFindService,
-        private gamesActivePoolService: GamesActivePoolService,
-        private gamesActiveDateService: GamesActiveDateService,
-        private gamesSessionService: GamesSessionService,
-        private gamesLeaderboardsService: GamesLeaderboardsService,
-        private gamesLeaderboardsFindService: GamesLeaderboardsFindService) {}
+  @Post()
+  @UseGuards(AdminActiveSessionGuard)
+  async createGame(@Body() createGameDTO: CreateGameDTO) {
+    return await this.gamesService.create(createGameDTO);
+  }
 
-    @Post()
-    @UseGuards(AdminActiveSessionGuard)
-    async createGame(@Body() createGameDTO: CreateGameDTO) {
-        return await this.gamesService.create(createGameDTO);
-    }
+  @Delete('/:id')
+  @UseGuards(AdminActiveSessionGuard)
+  async deleteGame(@Param('id') gameId: string): Promise<GameDocument> {
+    return await this.gamesService.delete(gameId);
+  }
 
-    @Delete('/:id')
-    @UseGuards(AdminActiveSessionGuard)
-    async deleteGame(@Param('id') gameId: string): Promise<GameDocument> {
-        return await this.gamesService.delete(gameId);
-    }
+  @Get('/active-today')
+  @UseGuards(AnyActiveSessionGuard)
+  async getActiveGameForToday(): Promise<Game> {
+    return await this.gamesFindService.findActiveGameForToday();
+  }
 
-    @Get('/active-today')
-    @UseGuards(AnyActiveSessionGuard)
-    async getActiveGameForToday(): Promise<Game> {
-        return await this.gamesFindService.findActiveGameForToday();
-    }
+  @Get('/all')
+  @UseGuards(AdminActiveSessionGuard)
+  async getAllGames(): Promise<GameDocument[]> {
+    return await this.gamesFindService.findAll();
+  }
 
-    @Get('/all')
-    @UseGuards(AdminActiveSessionGuard)
-    async getAllGames(): Promise<GameDocument[]> {
-        return await this.gamesFindService.findAll();
-    }
+  @Get('/all/active-pool')
+  @UseGuards(AdminActiveSessionGuard)
+  async getAllGamesInActivePool(): Promise<GameDocument[]> {
+    return await this.gamesFindService.findAllFilterByActivePool(true);
+  }
 
-    @Get('/all/active-pool')
-    @UseGuards(AdminActiveSessionGuard)
-    async getAllGamesInActivePool(): Promise<GameDocument[]> {
-        return await this.gamesFindService.findAllFilterByActivePool(true);
-    }
+  @Get('/all/not-active-pool')
+  @UseGuards(AdminActiveSessionGuard)
+  async getAllGamesNotInActivePool(): Promise<GameDocument[]> {
+    return await this.gamesFindService.findAllFilterByActivePool(false);
+  }
 
-    @Get('/all/not-active-pool')
-    @UseGuards(AdminActiveSessionGuard)
-    async getAllGamesNotInActivePool(): Promise<GameDocument[]> {
-        return await this.gamesFindService.findAllFilterByActivePool(false);
-    }
+  @Patch('/:id/active-pool-status')
+  @UseGuards(AdminActiveSessionGuard)
+  async modifyGamesActivePoolStatus(
+    @Param('id') gameId: string,
+    @Body() { status }: ModifyGameActivePoolStatusDTO,
+  ): Promise<GameDocument> {
+    return await this.gamesActivePoolService.modifyGameActivePoolStatus(
+      gameId,
+      status,
+    );
+  }
 
-    @Patch('/:id/active-pool-status')
-    @UseGuards(AdminActiveSessionGuard)
-    async modifyGamesActivePoolStatus(@Param('id') gameId: string, @Body() {status}: ModifyGameActivePoolStatusDTO): Promise<GameDocument> {
-        return await this.gamesActivePoolService.modifyGameActivePoolStatus(gameId, status);
-    }
+  @Post('/:id/set-active')
+  @UseGuards(AdminActiveSessionGuard)
+  async setActiveDateForGame(
+    @Param('id') gameId: string,
+    @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO,
+  ): Promise<ActiveDateDocument> {
+    return await this.gamesActiveDateService.setActiveDate(
+      gameId,
+      modifyActiveGameDateDTO,
+    );
+  }
 
-    @Post('/:id/set-active')
-    @UseGuards(AdminActiveSessionGuard)
-    async setActiveDateForGame(@Param('id') gameId: string, @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
-        return await this.gamesActiveDateService.setActiveDate(gameId, modifyActiveGameDateDTO)
-    }
+  @Delete('/:id/remove-active')
+  @UseGuards(AdminActiveSessionGuard)
+  async removeActiveDateForGame(
+    @Param('id') gameId: string,
+    @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO,
+  ): Promise<ActiveDateDocument> {
+    return await this.gamesActiveDateService.removeActiveDate(
+      gameId,
+      modifyActiveGameDateDTO,
+    );
+  }
 
-    @Delete('/:id/remove-active')
-    @UseGuards(AdminActiveSessionGuard)
-    async removeActiveDateForGame(@Param('id') gameId: string, @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
-        return await this.gamesActiveDateService.removeActiveDate(gameId, modifyActiveGameDateDTO);
-    }
+  @Post('/start')
+  @UseGuards(UserActiveSessionGuard)
+  @UseInterceptors(new SerializeDataInterceptor(ActiveGameSessionDTO))
+  async startGameSession(
+    @CurrentUser() user: UserDocument,
+  ): Promise<ActiveGameSessionDocument> {
+    return await this.gamesSessionService.startSession(user);
+  }
 
-    @Post('/start')
-    @UseGuards(UserActiveSessionGuard)
-    @UseInterceptors(new SerializeDataInterceptor(ActiveGameSessionDTO))
-    async startGameSession(@CurrentUser() user: UserDocument): Promise<ActiveGameSessionDocument> {
-        return await this.gamesSessionService.startSession(user);
-    }
+  @Post('/stop')
+  @UseGuards(UserActiveSessionGuard)
+  @UseInterceptors(new SerializeDataInterceptor(GameUserScoreDTO))
+  async stopGameSession(
+    @CurrentUser() user: UserDocument,
+  ): Promise<UserScoreDocument> {
+    return await this.gamesSessionService.stopSession(user);
+  }
 
-    @Post('/stop')
-    @UseGuards(UserActiveSessionGuard)
-    @UseInterceptors(new SerializeDataInterceptor(GameUserScoreDTO))
-    async stopGameSession(@CurrentUser() user: UserDocument): Promise<UserScoreDocument> {
-        return await this.gamesSessionService.stopSession(user);
-    }
+  @Get('/active-today/leaderboard')
+  @UseGuards(AnyActiveSessionGuard)
+  async getTodayActiveGameLeaderboard(): Promise<GameLeaderboardDocument> {
+    return await this.gamesLeaderboardsFindService.findLeaderboardForTodayActiveGame();
+  }
 
-    @Get('/active-today/leaderboard')
-    @UseGuards(AnyActiveSessionGuard)
-    async getTodayActiveGameLeaderboard(): Promise<GameLeaderboardDocument> {
-        return await this.gamesLeaderboardsFindService.findLeaderboardForTodayActiveGame();
-    }
+  @Get('/:id/leaderboard')
+  @UseGuards(AnyActiveSessionGuard)
+  async getGameLeaderboardForDate(
+    @Param('id') gameId,
+    @Body() { dateTimestamp }: DateTimestampDTO,
+  ) {
+    return await this.gamesLeaderboardsFindService.findLeaderboardByDateByGameId(
+      gameId,
+      dateTimestamp,
+    );
+  }
 
-    @Get('/:id/leaderboard')
-    @UseGuards(AnyActiveSessionGuard)
-    async getGameLeaderboardForDate(@Param('id') gameId, @Body() {dateTimestamp}: DateTimestampDTO) {
-        return await this.gamesLeaderboardsFindService.findLeaderboardByDateByGameId(gameId, dateTimestamp);
-    }
+  @Get('/:id/leaderboard/all')
+  @UseGuards(AnyActiveSessionGuard)
+  async getAllLeaderboardsForGame(@Param('id') gameId) {
+    return await this.gamesLeaderboardsFindService.findAllLeaderboardsForGame(
+      gameId,
+    );
+  }
 
-    @Get('/:id/leaderboard/all')
-    @UseGuards(AnyActiveSessionGuard)
-    async getAllLeaderboardsForGame(@Param('id') gameId) {
-        return await this.gamesLeaderboardsFindService.findAllLeaderboardsForGame(gameId);
-    }
-
-    @Get('/leaderboard/user/all')
-    @UseGuards(UserActiveSessionGuard)
-    async getAllLeaderboardsWhereUserIsRanked(@CurrentUser() user: UserDocument) {
-        return await this.gamesLeaderboardsFindService.findAllLeaderboardsWhereUserHasPlayed(user);
-    }
+  @Get('/leaderboard/user/all')
+  @UseGuards(UserActiveSessionGuard)
+  async getAllLeaderboardsWhereUserIsRanked(@CurrentUser() user: UserDocument) {
+    return await this.gamesLeaderboardsFindService.findAllLeaderboardsWhereUserHasPlayed(
+      user,
+    );
+  }
 }
