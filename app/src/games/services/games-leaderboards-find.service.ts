@@ -18,8 +18,7 @@ export class GamesLeaderboardsFindService {
   ) {}
 
   async findLeaderboardForTodayActiveGame(): Promise<GameLeaderboardDocument> {
-    const todayActiveGame: GameDocument =
-      await this.gamesFindService.findActiveGameForToday();
+    const todayActiveGame: GameDocument = await this.gamesFindService.findActiveGameForToday();
 
     try {
       return await this.gameLeaderboardModel
@@ -30,10 +29,7 @@ export class GamesLeaderboardsFindService {
         .populate('userScores')
         .exec();
     } catch (e) {
-      Logger.error(
-        e,
-        'games-leaderboards.service: findLeaderboardForTodayActiveGame()',
-      );
+      Logger.error(e, 'games-leaderboards.service: findLeaderboardForTodayActiveGame()');
       throw new ProblemRetrievingLeaderboardForGameException();
     }
   }
@@ -51,10 +47,7 @@ export class GamesLeaderboardsFindService {
         .populate('userScores')
         .exec();
     } catch (e) {
-      Logger.error(
-        e,
-        'games-leaderboards.service: findLeaderboardByDateForGame()',
-      );
+      Logger.error(e, 'games-leaderboards.service: findLeaderboardByDateForGame()');
       throw new ProblemRetrievingLeaderboardForGameException();
     }
   }
@@ -75,10 +68,7 @@ export class GamesLeaderboardsFindService {
         })
         .populate('userScores');
     } catch (e) {
-      Logger.error(
-        e,
-        'games-leaderboards.service: findAllLeaderboardsForGame()',
-      );
+      Logger.error(e, 'games-leaderboards.service: findAllLeaderboardsForGame()');
       throw new ProblemRetrievingLeaderboardsForGameException();
     }
   }
@@ -93,10 +83,7 @@ export class GamesLeaderboardsFindService {
         })
         .exec();
     } catch (e) {
-      Logger.error(
-        e,
-        'games-leaderboards.service: findAllLeaderboardsWhereUserHasPlayed()',
-      );
+      Logger.error(e, 'games-leaderboards.service: findAllLeaderboardsWhereUserHasPlayed()');
     }
   }
 }

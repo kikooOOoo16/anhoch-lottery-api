@@ -1,9 +1,6 @@
 import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  ProfileImageDocument,
-  ProfileImageSchema,
-} from './profile-image.model';
+import { ProfileImageDocument, ProfileImageSchema } from './profile-image.model';
 import { CoverImageDocument, CoverImageSchema } from './cover-image.model';
 
 export type UserDocument = User & Document;

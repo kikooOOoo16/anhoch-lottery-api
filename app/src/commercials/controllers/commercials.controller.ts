@@ -47,8 +47,7 @@ export class CommercialsController {
   @Get('')
   @UseGuards(UserActiveSessionGuard)
   async getRandomActiveCommercial(@Res({ passthrough: true }) res: Response) {
-    const commercial: CommercialDocument =
-      await this.commercialsService.getRandomActiveCommercial();
+    const commercial: CommercialDocument = await this.commercialsService.getRandomActiveCommercial();
 
     const stream = createReadStream(join(process.cwd(), commercial.path));
 
@@ -82,9 +81,7 @@ export class CommercialsController {
     @Body()
     modifyCommercialsWatchDurationDTO: ModifyCommercialsWatchDurationDTO,
   ): Promise<any> {
-    return await this.commercialsService.modifyWatchDuration(
-      modifyCommercialsWatchDurationDTO,
-    );
+    return await this.commercialsService.modifyWatchDuration(modifyCommercialsWatchDurationDTO);
   }
 
   @Patch('/:id')
@@ -93,10 +90,7 @@ export class CommercialsController {
     @Param('id') commercialId: string,
     @Body() updateCommercialDTO: UpdateCommercialDTO,
   ): Promise<CommercialDocument> {
-    return await this.commercialsService.update(
-      commercialId,
-      updateCommercialDTO,
-    );
+    return await this.commercialsService.update(commercialId, updateCommercialDTO);
   }
 
   @Patch('/:id/status')
@@ -105,10 +99,7 @@ export class CommercialsController {
     @Param('id') commercialId: string,
     @Body() modifyActiveStatusDTO: ModifyCommercialActiveStatusDTO,
   ): Promise<CommercialDocument> {
-    return await this.commercialsService.modifyActiveStatus(
-      commercialId,
-      modifyActiveStatusDTO,
-    );
+    return await this.commercialsService.modifyActiveStatus(commercialId, modifyActiveStatusDTO);
   }
 
   @Delete('/:id/delete')

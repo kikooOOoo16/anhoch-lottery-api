@@ -13,17 +13,9 @@ import { ProblemUpdatingAdminException } from '../../exceptions/admin-related/pr
 
 @Injectable()
 export class AdminsService {
-  constructor(
-    @InjectModel('Admin') private readonly adminModel: Model<AdminDocument>,
-  ) {}
+  constructor(@InjectModel('Admin') private readonly adminModel: Model<AdminDocument>) {}
 
-  async create({
-    firstName,
-    lastName,
-    email,
-    password,
-    masterPassword,
-  }: CreateAdminDTO): Promise<AdminDocument> {
+  async create({ firstName, lastName, email, password, masterPassword }: CreateAdminDTO): Promise<AdminDocument> {
     AdminsService.verifyMasterPassword(masterPassword);
 
     try {
@@ -48,11 +40,7 @@ export class AdminsService {
     Object.assign(admin, updateAdminDTO);
 
     try {
-      return await this.adminModel.findByIdAndUpdate(
-        admin.id,
-        { ...admin },
-        { new: true },
-      );
+      return await this.adminModel.findByIdAndUpdate(admin.id, { ...admin }, { new: true });
     } catch (e) {
       Logger.error(e, 'users.service.ts: update()');
       throw new ProblemUpdatingAdminException();

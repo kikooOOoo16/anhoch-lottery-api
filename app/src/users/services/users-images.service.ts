@@ -30,10 +30,7 @@ export class UsersImagesService {
     private readonly coverImageModel: Model<CoverImageDocument>,
   ) {}
 
-  async updateProfileImage(
-    user: UserDocument,
-    file: Express.Multer.File,
-  ): Promise<ProfileImageDocument> {
+  async updateProfileImage(user: UserDocument, file: Express.Multer.File): Promise<ProfileImageDocument> {
     let savedUser: UserDocument;
     const oldProfileImage: ProfileImageDocument = user.profileImage;
 
@@ -54,18 +51,12 @@ export class UsersImagesService {
       throw new ProblemSavingUserProfileImageException();
     }
 
-    UsersImagesService.removeProfileImageFile(
-      oldProfileImage,
-      process.env.PROFILE_IMG_DIR,
-    );
+    UsersImagesService.removeProfileImageFile(oldProfileImage, process.env.PROFILE_IMG_DIR);
 
     return savedUser.profileImage;
   }
 
-  async updateCoverImage(
-    user: UserDocument,
-    file: Express.Multer.File,
-  ): Promise<CoverImageDocument> {
+  async updateCoverImage(user: UserDocument, file: Express.Multer.File): Promise<CoverImageDocument> {
     let savedUser: UserDocument;
     const oldCoverImage = user.coverImage;
 
@@ -86,10 +77,7 @@ export class UsersImagesService {
       throw new ProblemSavingCoverImageException();
     }
 
-    UsersImagesService.removeCoverImageFile(
-      oldCoverImage,
-      process.env.COVER_IMG_DIR,
-    );
+    UsersImagesService.removeCoverImageFile(oldCoverImage, process.env.COVER_IMG_DIR);
 
     return savedUser.coverImage;
   }
@@ -148,10 +136,7 @@ export class UsersImagesService {
       throw new ProblemDeletingProfileImageException();
     }
 
-    UsersImagesService.removeProfileImageFile(
-      oldProfileImage,
-      process.env.PROFILE_IMG_DIR,
-    );
+    UsersImagesService.removeProfileImageFile(oldProfileImage, process.env.PROFILE_IMG_DIR);
 
     return {
       message: 'Profile image removed successfully.',
@@ -173,19 +158,14 @@ export class UsersImagesService {
       Logger.error(e, 'users-images.service: deleteCoverImage()');
     }
 
-    UsersImagesService.removeCoverImageFile(
-      oldCoverImage,
-      process.env.COVER_IMG_DIR,
-    );
+    UsersImagesService.removeCoverImageFile(oldCoverImage, process.env.COVER_IMG_DIR);
 
     return {
       message: 'Cover image removed successfully.',
     };
   }
 
-  async updateDefaultUserProfileImage(
-    file: Express.Multer.File,
-  ): Promise<ProfileImageDocument> {
+  async updateDefaultUserProfileImage(file: Express.Multer.File): Promise<ProfileImageDocument> {
     let deletedDefaultImage: ProfileImageDocument;
     let savedDefaultImage: ProfileImageDocument;
 
@@ -203,26 +183,18 @@ export class UsersImagesService {
       deletedDefaultImage = await this.profileImageModel.findOneAndRemove({});
       savedDefaultImage = await defaultImage.save();
     } catch (e) {
-      Logger.error(
-        e,
-        'default-images.service.ts: updateDefaultUserProfileImage()',
-      );
+      Logger.error(e, 'default-images.service.ts: updateDefaultUserProfileImage()');
       throw new ProblemUpdatingDefaultProfileImageException();
     }
 
     if (deletedDefaultImage) {
-      UsersImagesService.removeProfileImageFile(
-        deletedDefaultImage,
-        process.env.DEFAULT_PROFILE_IMG_DIR,
-      );
+      UsersImagesService.removeProfileImageFile(deletedDefaultImage, process.env.DEFAULT_PROFILE_IMG_DIR);
     }
 
     return savedDefaultImage;
   }
 
-  async updateDefaultCoverImage(
-    file: Express.Multer.File,
-  ): Promise<CoverImageDocument> {
+  async updateDefaultCoverImage(file: Express.Multer.File): Promise<CoverImageDocument> {
     let deletedDefaultCoverImage: CoverImageDocument;
     let savedDefaultCoverImage: CoverImageDocument;
 
@@ -237,9 +209,7 @@ export class UsersImagesService {
     });
 
     try {
-      deletedDefaultCoverImage = await this.coverImageModel.findOneAndRemove(
-        {},
-      );
+      deletedDefaultCoverImage = await this.coverImageModel.findOneAndRemove({});
       savedDefaultCoverImage = await defaultCoverImage.save();
     } catch (e) {
       Logger.error(e, 'default-images.service.ts: updateDefaultCoverImage()');
@@ -247,24 +217,16 @@ export class UsersImagesService {
     }
 
     if (deletedDefaultCoverImage) {
-      UsersImagesService.removeCoverImageFile(
-        deletedDefaultCoverImage,
-        process.env.DEFAULT_COVER_IMG_DIR,
-      );
+      UsersImagesService.removeCoverImageFile(deletedDefaultCoverImage, process.env.DEFAULT_COVER_IMG_DIR);
     }
 
     return savedDefaultCoverImage;
   }
 
-  private static removeProfileImageFile(
-    profileImage: ProfileImageDocument,
-    profileImageDirectory: string,
-  ) {
+  private static removeProfileImageFile(profileImage: ProfileImageDocument, profileImageDirectory: string) {
     if (profileImage) {
       try {
-        fs.unlinkSync(
-          `${process.env.UPLOADED_FILES_DESTINATION}${profileImageDirectory}${profileImage.filename}`,
-        );
+        fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${profileImageDirectory}${profileImage.filename}`);
       } catch (e) {
         Logger.error(e, 'users-images.service: removeProfileImageFile');
         throw new ProblemRemovingOldProfileImageException();
@@ -272,15 +234,10 @@ export class UsersImagesService {
     }
   }
 
-  private static removeCoverImageFile(
-    coverImage: CoverImageDocument,
-    coverImageDirectory: string,
-  ) {
+  private static removeCoverImageFile(coverImage: CoverImageDocument, coverImageDirectory: string) {
     if (coverImage) {
       try {
-        fs.unlinkSync(
-          `${process.env.UPLOADED_FILES_DESTINATION}${coverImageDirectory}${coverImage.filename}`,
-        );
+        fs.unlinkSync(`${process.env.UPLOADED_FILES_DESTINATION}${coverImageDirectory}${coverImage.filename}`);
       } catch (e) {
         Logger.error(e, 'users-images.service: removeCoverImageFile');
         throw new ProblemRemovingOldProfileImageException();

@@ -51,10 +51,7 @@ const defaultCoverImageStorageOptions = {
 
 @Controller('admin')
 export class AdminsController {
-  constructor(
-    private adminsService: AdminsService,
-    private usersImagesService: UsersImagesService,
-  ) {}
+  constructor(private adminsService: AdminsService, private usersImagesService: UsersImagesService) {}
 
   @Post('/create')
   @UseGuards(NoActiveSessionGuard)
@@ -66,10 +63,7 @@ export class AdminsController {
   @Patch('/update')
   @UseGuards(AdminActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(AdminDTO))
-  async updateAdmin(
-    @Body() updateAdminDTO: UpdateAdminDTO,
-    @CurrentAdmin() admin: AdminDocument,
-  ) {
+  async updateAdmin(@Body() updateAdminDTO: UpdateAdminDTO, @CurrentAdmin() admin: AdminDocument) {
     return await this.adminsService.update(admin, updateAdminDTO);
   }
 

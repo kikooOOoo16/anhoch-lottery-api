@@ -6,12 +6,7 @@ import { CommercialSchema } from './models/commercial.model';
 import { CommonModule } from '../common/common.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: 'Commercial', schema: CommercialSchema },
-    ]),
-    CommonModule,
-  ],
+  imports: [MongooseModule.forFeature([{ name: 'Commercial', schema: CommercialSchema }]), CommonModule],
   providers: [CommercialsService],
   controllers: [CommercialsController],
 })

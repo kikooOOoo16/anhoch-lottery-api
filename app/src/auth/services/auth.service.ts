@@ -14,10 +14,7 @@ const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private usersService: UsersService,
-    private adminsService: AdminsService,
-  ) {}
+  constructor(private usersService: UsersService, private adminsService: AdminsService) {}
 
   async signUp(createUserDTO) {
     return await this.usersService.create(createUserDTO);
@@ -39,10 +36,7 @@ export class AuthService {
     return admin;
   }
 
-  private static async validatePassword(
-    account: UserDocument | AdminDocument,
-    password: string,
-  ) {
+  private static async validatePassword(account: UserDocument | AdminDocument, password: string) {
     const [salt, storedHash] = account.password.split('.');
 
     const hash = (await scrypt(password, salt, 32)) as Buffer;

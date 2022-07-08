@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AdminActiveSessionGuard } from '../../guards/admin-active-session.guard';
 import { GamesService } from '../services/games.service';
 import { CreateGameDTO } from '../dtos/create-game.dto';
@@ -88,10 +78,7 @@ export class GamesController {
     @Param('id') gameId: string,
     @Body() { status }: ModifyGameActivePoolStatusDTO,
   ): Promise<GameDocument> {
-    return await this.gamesActivePoolService.modifyGameActivePoolStatus(
-      gameId,
-      status,
-    );
+    return await this.gamesActivePoolService.modifyGameActivePoolStatus(gameId, status);
   }
 
   @Post('/:id/set-active')
@@ -100,10 +87,7 @@ export class GamesController {
     @Param('id') gameId: string,
     @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO,
   ): Promise<ActiveDateDocument> {
-    return await this.gamesActiveDateService.setActiveDate(
-      gameId,
-      modifyActiveGameDateDTO,
-    );
+    return await this.gamesActiveDateService.setActiveDate(gameId, modifyActiveGameDateDTO);
   }
 
   @Delete('/:id/remove-active')
@@ -112,27 +96,20 @@ export class GamesController {
     @Param('id') gameId: string,
     @Body() modifyActiveGameDateDTO: ModifyActiveGameDateDTO,
   ): Promise<ActiveDateDocument> {
-    return await this.gamesActiveDateService.removeActiveDate(
-      gameId,
-      modifyActiveGameDateDTO,
-    );
+    return await this.gamesActiveDateService.removeActiveDate(gameId, modifyActiveGameDateDTO);
   }
 
   @Post('/start')
   @UseGuards(UserActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(ActiveGameSessionDTO))
-  async startGameSession(
-    @CurrentUser() user: UserDocument,
-  ): Promise<ActiveGameSessionDocument> {
+  async startGameSession(@CurrentUser() user: UserDocument): Promise<ActiveGameSessionDocument> {
     return await this.gamesSessionService.startSession(user);
   }
 
   @Post('/stop')
   @UseGuards(UserActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(GameUserScoreDTO))
-  async stopGameSession(
-    @CurrentUser() user: UserDocument,
-  ): Promise<UserScoreDocument> {
+  async stopGameSession(@CurrentUser() user: UserDocument): Promise<UserScoreDocument> {
     return await this.gamesSessionService.stopSession(user);
   }
 
@@ -144,29 +121,19 @@ export class GamesController {
 
   @Get('/:id/leaderboard')
   @UseGuards(AnyActiveSessionGuard)
-  async getGameLeaderboardForDate(
-    @Param('id') gameId,
-    @Body() { dateTimestamp }: DateTimestampDTO,
-  ) {
-    return await this.gamesLeaderboardsFindService.findLeaderboardByDateByGameId(
-      gameId,
-      dateTimestamp,
-    );
+  async getGameLeaderboardForDate(@Param('id') gameId, @Body() { dateTimestamp }: DateTimestampDTO) {
+    return await this.gamesLeaderboardsFindService.findLeaderboardByDateByGameId(gameId, dateTimestamp);
   }
 
   @Get('/:id/leaderboard/all')
   @UseGuards(AnyActiveSessionGuard)
   async getAllLeaderboardsForGame(@Param('id') gameId) {
-    return await this.gamesLeaderboardsFindService.findAllLeaderboardsForGame(
-      gameId,
-    );
+    return await this.gamesLeaderboardsFindService.findAllLeaderboardsForGame(gameId);
   }
 
   @Get('/leaderboard/user/all')
   @UseGuards(UserActiveSessionGuard)
   async getAllLeaderboardsWhereUserIsRanked(@CurrentUser() user: UserDocument) {
-    return await this.gamesLeaderboardsFindService.findAllLeaderboardsWhereUserHasPlayed(
-      user,
-    );
+    return await this.gamesLeaderboardsFindService.findAllLeaderboardsWhereUserHasPlayed(user);
   }
 }

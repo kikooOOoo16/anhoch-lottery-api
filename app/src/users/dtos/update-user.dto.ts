@@ -1,13 +1,4 @@
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  Matches,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class UpdateUserDTO {
   @IsOptional()
@@ -35,12 +26,9 @@ export class UpdateUserDTO {
   age: number;
 
   @IsOptional()
-  @Matches(
-    /((00)?\+?[389]{3})?[\/\-\s*.]?(((\(0\))|0)?\s*7\d)[\/\-\s*.,]?(\d{3})[\/\-\s*.,]?(\d{3})/,
-    {
-      message: 'Please enter a valid phone number.',
-    },
-  )
+  @Matches(/((00)?\+?[389]{3})?[\/\-\s*.]?(((\(0\))|0)?\s*7\d)[\/\-\s*.,]?(\d{3})[\/\-\s*.,]?(\d{3})/, {
+    message: 'Please enter a valid phone number.',
+  })
   @IsString()
   phone: string;
 }

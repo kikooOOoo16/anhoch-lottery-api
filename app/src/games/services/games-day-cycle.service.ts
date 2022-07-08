@@ -6,10 +6,7 @@ import { GamesSessionService } from './games-session.service';
 
 @Injectable()
 export class GamesDayCycleService {
-  constructor(
-    private usersService: UsersService,
-    private gamesSessionService: GamesSessionService,
-  ) {}
+  constructor(private usersService: UsersService, private gamesSessionService: GamesSessionService) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleActiveGameCycle() {
@@ -18,8 +15,7 @@ export class GamesDayCycleService {
     for (const user of users) {
       await this.usersService.modifyPlayedTodayStatus(user, false);
 
-      const activeGameSession =
-        await this.gamesSessionService.findUserActiveGameSession(user, true);
+      const activeGameSession = await this.gamesSessionService.findUserActiveGameSession(user, true);
 
       if (activeGameSession) {
         await this.gamesSessionService.stopSession(user);

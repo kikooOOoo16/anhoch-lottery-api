@@ -23,11 +23,7 @@ export class HelperService {
     }
   }
 
-  public static convertToTimestamp(
-    day: number,
-    month: number,
-    year: number,
-  ): number {
+  public static convertToTimestamp(day: number, month: number, year: number): number {
     return new Date(year, month - 1, day).getTime();
   }
 
@@ -51,9 +47,7 @@ export class HelperService {
   public static formatTimestamp(timestamp: number): string {
     let seconds: number | string = Math.floor((timestamp / 1000) % 60);
     let minutes: number | string = Math.floor((timestamp / (1000 * 60)) % 60);
-    let hours: number | string = Math.floor(
-      (timestamp / (1000 * 60 * 60)) % 24,
-    );
+    let hours: number | string = Math.floor((timestamp / (1000 * 60 * 60)) % 24);
 
     hours = hours < 10 ? '0' + hours : hours;
     minutes = minutes < 10 ? '0' + minutes : minutes;

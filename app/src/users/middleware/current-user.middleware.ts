@@ -6,11 +6,7 @@ import { Request, Response } from 'express';
 export class CurrentUserMiddleware implements NestMiddleware {
   constructor(private usersService: UsersService) {}
 
-  async use(
-    req: Request,
-    res: Response,
-    next: (error?: any) => void,
-  ): Promise<any> {
+  async use(req: Request, res: Response, next: (error?: any) => void): Promise<any> {
     const { userId } = req.session || {};
 
     if (userId) {

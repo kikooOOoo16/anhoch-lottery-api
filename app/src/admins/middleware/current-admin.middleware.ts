@@ -6,11 +6,7 @@ import { AdminsService } from '../services/admins.service';
 export class CurrentAdminMiddleware implements NestMiddleware {
   constructor(private adminsService: AdminsService) {}
 
-  async use(
-    req: Request,
-    res: Response,
-    next: (error?: any) => void,
-  ): Promise<any> {
+  async use(req: Request, res: Response, next: (error?: any) => void): Promise<any> {
     const { adminId } = req.session || {};
 
     if (adminId) {

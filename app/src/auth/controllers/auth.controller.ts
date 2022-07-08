@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Req,
-  Session,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, Session, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { NoActiveSessionGuard } from '../../guards/no-active-session.guard';
 import { UserDocument } from '../../users/models/user.model';
@@ -25,10 +17,7 @@ export class AuthController {
   @Post('/signup')
   @UseGuards(NoActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(UserDTO))
-  async signUpUser(
-    @Body() createUserDTO: CreateUserDTO,
-    @Session() session: any,
-  ): Promise<UserDocument> {
+  async signUpUser(@Body() createUserDTO: CreateUserDTO, @Session() session: any): Promise<UserDocument> {
     const user: UserDocument = await this.authService.signUp(createUserDTO);
 
     session.userId = user.id;
@@ -39,10 +28,7 @@ export class AuthController {
   @Post('/signin')
   @UseGuards(NoActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(UserDTO))
-  async signInUser(
-    @Body() signInDTO: SignInDTO,
-    @Session() session: any,
-  ): Promise<UserDocument> {
+  async signInUser(@Body() signInDTO: SignInDTO, @Session() session: any): Promise<UserDocument> {
     const user = await this.authService.signIn(signInDTO);
 
     session.userId = user.id;
@@ -53,10 +39,7 @@ export class AuthController {
   @Post('/admin/signin')
   @UseGuards(NoActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(AdminDTO))
-  async signInAdmin(
-    @Body() signInDTO: SignInDTO,
-    @Session() session: any,
-  ): Promise<AdminDocument> {
+  async signInAdmin(@Body() signInDTO: SignInDTO, @Session() session: any): Promise<AdminDocument> {
     const admin = await this.authService.signInAdmin(signInDTO);
 
     session.adminId = admin.id;

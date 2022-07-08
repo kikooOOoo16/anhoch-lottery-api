@@ -60,10 +60,7 @@ const coverImageStorageOptions = {
 
 @Controller('user')
 export class UsersController {
-  constructor(
-    private usersService: UsersService,
-    private userImagesService: UsersImagesService,
-  ) {}
+  constructor(private usersService: UsersService, private userImagesService: UsersImagesService) {}
 
   @Get()
   @UseGuards(UserActiveSessionGuard)
@@ -82,10 +79,7 @@ export class UsersController {
   @Patch()
   @UseGuards(UserActiveSessionGuard)
   @UseInterceptors(new SerializeDataInterceptor(UserDTO))
-  async updateUserData(
-    @CurrentUser() user: UserDocument,
-    @Body() updateUserDTO: UpdateUserDTO,
-  ): Promise<UserDocument> {
+  async updateUserData(@CurrentUser() user: UserDocument, @Body() updateUserDTO: UpdateUserDTO): Promise<UserDocument> {
     return await this.usersService.update(user, updateUserDTO);
   }
 
@@ -127,8 +121,7 @@ export class UsersController {
     @Param('id') userId: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const profileImage: ProfileImageDocument =
-      await this.userImagesService.getProfileImageByUserId(userId);
+    const profileImage: ProfileImageDocument = await this.userImagesService.getProfileImageByUserId(userId);
 
     const stream = createReadStream(join(process.cwd(), profileImage.path));
 
@@ -142,12 +135,8 @@ export class UsersController {
 
   @Get('/:id/cover-image')
   @UseGuards(AnyActiveSessionGuard)
-  async getCoverImage(
-    @Param('id') userId: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<StreamableFile> {
-    const coverImage: CoverImageDocument =
-      await this.userImagesService.getCoverImageByUserId(userId);
+  async getCoverImage(@Param('id') userId: string, @Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+    const coverImage: CoverImageDocument = await this.userImagesService.getCoverImageByUserId(userId);
 
     const stream = createReadStream(join(process.cwd(), coverImage.path));
 

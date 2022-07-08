@@ -1,13 +1,4 @@
-import {
-  IsEmail,
-  IsNumber,
-  IsString,
-  Matches,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNumber, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateUserDTO {
   @IsString()
@@ -38,12 +29,9 @@ export class CreateUserDTO {
   @MaxLength(30)
   password: string;
 
-  @Matches(
-    /((00)?\+?[389]{3})?[\/\-\s*.]?(((\(0\))|0)?\s*7\d)[\/\-\s*.,]?(\d{3})[\/\-\s*.,]?(\d{3})/,
-    {
-      message: 'Please enter a valid phone number.',
-    },
-  )
+  @Matches(/((00)?\+?[389]{3})?[\/\-\s*.]?(((\(0\))|0)?\s*7\d)[\/\-\s*.,]?(\d{3})[\/\-\s*.,]?(\d{3})/, {
+    message: 'Please enter a valid phone number.',
+  })
   @IsString()
   phone: string;
 }

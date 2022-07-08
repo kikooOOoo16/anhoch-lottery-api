@@ -11,9 +11,7 @@ import { ProblemRemovingLeaderboardFromGamesListException } from '../../exceptio
 
 @Injectable()
 export class GamesService {
-  constructor(
-    @InjectModel('Game') private readonly gameModel: Model<GameDocument>,
-  ) {}
+  constructor(@InjectModel('Game') private readonly gameModel: Model<GameDocument>) {}
 
   async create(createGameDTO: CreateGameDTO): Promise<GameDocument> {
     try {
@@ -50,13 +48,8 @@ export class GamesService {
     }
   }
 
-  async removeLeaderboardFromGame(
-    game: GameDocument,
-    leaderboard: GameLeaderboardDocument,
-  ): Promise<GameDocument> {
-    game.gameLeaderboards = game.gameLeaderboards.filter(
-      (leaderboardId) => leaderboardId.toString() !== leaderboard.id,
-    );
+  async removeLeaderboardFromGame(game: GameDocument, leaderboard: GameLeaderboardDocument): Promise<GameDocument> {
+    game.gameLeaderboards = game.gameLeaderboards.filter(leaderboardId => leaderboardId.toString() !== leaderboard.id);
 
     try {
       return await game.save();

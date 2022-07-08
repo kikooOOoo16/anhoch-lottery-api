@@ -21,5 +21,4 @@ export class ActiveGameSession {
   startTimeStamp: number;
 }
 
-export const ActiveGameSessionSchema =
-  SchemaFactory.createForClass(ActiveGameSession);
+export const ActiveGameSessionSchema = SchemaFactory.createForClass(ActiveGameSession);

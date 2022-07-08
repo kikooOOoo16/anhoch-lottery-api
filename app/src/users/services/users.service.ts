@@ -14,9 +14,7 @@ import { ProblemRetrievingUsersException } from '../../exceptions/user-related/p
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel('User') private readonly userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel('User') private readonly userModel: Model<UserDocument>) {}
 
   async create(createUserDTO: CreateUserDTO): Promise<UserDocument> {
     const newUser: UserDocument = new this.userModel(createUserDTO);
@@ -31,20 +29,13 @@ export class UsersService {
     }
   }
 
-  async update(
-    user: UserDocument,
-    updateUserDTO: Partial<UpdateUserDTO>,
-  ): Promise<UserDocument> {
+  async update(user: UserDocument, updateUserDTO: Partial<UpdateUserDTO>): Promise<UserDocument> {
     HelperService.checkIfObjectIsEmpty(updateUserDTO);
 
     Object.assign(user, updateUserDTO);
 
     try {
-      return await this.userModel.findByIdAndUpdate(
-        user.id,
-        { ...user },
-        { new: true },
-      );
+      return await this.userModel.findByIdAndUpdate(user.id, { ...user }, { new: true });
     } catch (e) {
       Logger.error(e, 'users.service.ts: update()');
       HelperService.handleDuplicateKeyErr(e);

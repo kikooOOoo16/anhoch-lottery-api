@@ -26,22 +26,16 @@ export class CommercialsService {
     private readonly commercialModel: Model<CommercialDocument>,
   ) {}
 
-  async create(
-    { name, website }: CreateCommercialDTO,
-    file: Express.Multer.File,
-  ): Promise<CommercialDocument> {
+  async create({ name, website }: CreateCommercialDTO, file: Express.Multer.File): Promise<CommercialDocument> {
     if (!file) {
       throw new NoCommercialVideoProvidedException();
     }
 
-    const currentlySetWatchDuration: number =
-      await this.getCurrentWatchDurationValue();
+    const currentlySetWatchDuration: number = await this.getCurrentWatchDurationValue();
 
     const commercial: CommercialDocument = new this.commercialModel({
       name,
-      minimumWatchSeconds: currentlySetWatchDuration
-        ? currentlySetWatchDuration
-        : 5,
+      minimumWatchSeconds: currentlySetWatchDuration ? currentlySetWatchDuration : 5,
       website: website ? website : null,
       filename: file.filename,
       path: file.path,
@@ -52,20 +46,14 @@ export class CommercialsService {
       return await commercial.save();
     } catch (e) {
       Logger.error(e, 'commercials.service: create()');
-      CommercialsService.removeCommercialVideoFile(
-        commercial,
-        process.env.COMMERCIAL_VIDEOS_DIR,
-      );
+      CommercialsService.removeCommercialVideoFile(commercial, process.env.COMMERCIAL_VIDEOS_DIR);
 
       HelperService.handleDuplicateKeyErr(e);
       throw new ProblemCreatingCommercialException();
     }
   }
 
-  async update(
-    id: string,
-    updateCommercialDTO: UpdateCommercialDTO,
-  ): Promise<CommercialDocument> {
+  async update(id: string, updateCommercialDTO: UpdateCommercialDTO): Promise<CommercialDocument> {
     const commercial: CommercialDocument = await this.findById(id);
 
     Object.assign(commercial, updateCommercialDTO);
@@ -90,10 +78,7 @@ export class CommercialsService {
       throw new NoCommercialVideoFoundException();
     }
 
-    CommercialsService.removeCommercialVideoFile(
-      deletedCommercial,
-      process.env.COMMERCIAL_VIDEOS_DIR,
-    );
+    CommercialsService.removeCommercialVideoFile(deletedCommercial, process.env.COMMERCIAL_VIDEOS_DIR);
 
     return deletedCommercial;
   }
@@ -147,9 +132,7 @@ export class CommercialsService {
     return activeCommercials[0];
   }
 
-  async modifyWatchDuration({
-    minimumWatchSeconds,
-  }: ModifyCommercialsWatchDurationDTO): Promise<any> {
+  async modifyWatchDuration({ minimumWatchSeconds }: ModifyCommercialsWatchDurationDTO): Promise<any> {
     try {
       return await this.commercialModel.updateMany(
         {},
@@ -183,10 +166,7 @@ export class CommercialsService {
     }
   }
 
-  private static removeCommercialVideoFile(
-    commercialVideo: CommercialDocument,
-    commercialVideoDirectory: string,
-  ) {
+  private static removeCommercialVideoFile(commercialVideo: CommercialDocument, commercialVideoDirectory: string) {
     if (commercialVideo) {
       try {
         fs.unlinkSync(

@@ -39,17 +39,15 @@ export class GamesSessionService {
       throw new CanNotPlayMoreThanOnceOnTheSameDayException();
     }
 
-    const currentActiveGame: Game =
-      await this.gamesFindService.findActiveGameForToday();
+    const currentActiveGame: Game = await this.gamesFindService.findActiveGameForToday();
 
     const startTimeStamp = new Date().getTime();
 
-    const gameSession: ActiveGameSessionDocument =
-      new this.activeGameSessionModel({
-        user,
-        game: currentActiveGame,
-        startTimeStamp,
-      });
+    const gameSession: ActiveGameSessionDocument = new this.activeGameSessionModel({
+      user,
+      game: currentActiveGame,
+      startTimeStamp,
+    });
 
     try {
       activeGameSession = await gameSession.save();
@@ -64,8 +62,7 @@ export class GamesSessionService {
   }
 
   async stopSession(user: UserDocument): Promise<UserScoreDocument> {
-    const activeGameSession: ActiveGameSessionDocument =
-      await this.findUserActiveGameSession(user);
+    const activeGameSession: ActiveGameSessionDocument = await this.findUserActiveGameSession(user);
     const gameLeaderboard: GameLeaderboardDocument =
       await this.gamesLeaderboardsFindService.findLeaderboardByDateForGame(
         activeGameSession.game,
@@ -78,17 +75,13 @@ export class GamesSessionService {
 
     await this.deleteActiveGameSession(user);
 
-    const userScore: UserScoreDocument =
-      await this.gamesUsersScoreService.createUserScore(
-        user,
-        gameLeaderboard,
-        timeFinished,
-      );
-
-    await this.gamesLeaderboardsService.addScoreToLeaderboard(
+    const userScore: UserScoreDocument = await this.gamesUsersScoreService.createUserScore(
+      user,
       gameLeaderboard,
-      userScore,
+      timeFinished,
     );
+
+    await this.gamesLeaderboardsService.addScoreToLeaderboard(gameLeaderboard, userScore);
 
     return userScore;
   }
@@ -122,10 +115,9 @@ export class GamesSessionService {
   async deleteActiveGameSession(user: UserDocument) {
     let deletedActiveGameSession: ActiveGameSessionDocument;
     try {
-      deletedActiveGameSession =
-        await this.activeGameSessionModel.findOneAndDelete({
-          user,
-        });
+      deletedActiveGameSession = await this.activeGameSessionModel.findOneAndDelete({
+        user,
+      });
     } catch (e) {
       Logger.error(e, 'games-session.service.ts: deleteActiveGameSession()');
       throw new ProblemDeletingActiveGameSessionException();

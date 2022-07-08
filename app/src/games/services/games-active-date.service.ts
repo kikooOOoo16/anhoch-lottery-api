@@ -27,10 +27,7 @@ export class GamesActiveDateService {
     private gamesLeaderboardsService: GamesLeaderboardsService,
   ) {}
 
-  async findIfAnyGameIsActiveOnDate(
-    game: GameDocument,
-    timestamp,
-  ): Promise<void> {
+  async findIfAnyGameIsActiveOnDate(game: GameDocument, timestamp): Promise<void> {
     let foundDate: ActiveDateDocument;
 
     try {
@@ -49,22 +46,12 @@ export class GamesActiveDateService {
       const receivedDate = new Date(timestamp);
       throw new GameAlreadySetAsActiveForDateException(receivedDate);
     } else if (foundDate) {
-      Logger.debug(
-        `The game ${
-          foundDate.game.name
-        } is already set on the date - ${new Date(timestamp)}`,
-      );
-      throw new AnotherGameActiveForDateException(
-        foundDate.game.name,
-        new Date(timestamp),
-      );
+      Logger.debug(`The game ${foundDate.game.name} is already set on the date - ${new Date(timestamp)}`);
+      throw new AnotherGameActiveForDateException(foundDate.game.name, new Date(timestamp));
     }
   }
 
-  async setActiveDate(
-    id,
-    { day, month, year }: ModifyActiveGameDateDTO,
-  ): Promise<ActiveDateDocument> {
+  async setActiveDate(id, { day, month, year }: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
     const game: GameDocument = await this.gamesFindService.findById(id);
     let savedActiveDate: ActiveDateDocument;
 
@@ -72,11 +59,7 @@ export class GamesActiveDateService {
       throw new SelectedGameNotInActivePoolException();
     }
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(
-      day,
-      month,
-      year,
-    );
+    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
 
     GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 
@@ -94,32 +77,21 @@ export class GamesActiveDateService {
       throw new ProblemSettingActiveDateForGameException();
     }
 
-    const gameLeaderboard: GameLeaderboardDocument =
-      await this.gamesLeaderboardsService.createLeaderboardForGame(
-        game,
-        dateTimestamp,
-      );
-
-    await this.gamesService.addLeaderboardToGameLeaderboardsList(
+    const gameLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.createLeaderboardForGame(
       game,
-      gameLeaderboard,
+      dateTimestamp,
     );
+
+    await this.gamesService.addLeaderboardToGameLeaderboardsList(game, gameLeaderboard);
 
     return savedActiveDate;
   }
 
-  async removeActiveDate(
-    id,
-    { day, month, year }: ModifyActiveGameDateDTO,
-  ): Promise<ActiveDateDocument> {
+  async removeActiveDate(id, { day, month, year }: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
     let activeDate: ActiveDateDocument;
     const game: GameDocument = await this.gamesFindService.findById(id);
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(
-      day,
-      month,
-      year,
-    );
+    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
 
     GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 
@@ -140,11 +112,10 @@ export class GamesActiveDateService {
       throw new NoActiveDateFoundException();
     }
 
-    const deletedLeaderboard: GameLeaderboardDocument =
-      await this.gamesLeaderboardsService.deleteLeaderboardForGame(
-        game,
-        dateTimestamp,
-      );
+    const deletedLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.deleteLeaderboardForGame(
+      game,
+      dateTimestamp,
+    );
 
     await this.gamesService.removeLeaderboardFromGame(game, deletedLeaderboard);
 

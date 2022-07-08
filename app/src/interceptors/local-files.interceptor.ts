@@ -11,9 +11,7 @@ interface LocalFilesInterceptorOptions {
   limits?: MulterOptions['limits'];
 }
 
-function LocalFilesInterceptor(
-  options: LocalFilesInterceptorOptions,
-): Type<NestInterceptor> {
+function LocalFilesInterceptor(options: LocalFilesInterceptorOptions): Type<NestInterceptor> {
   @Injectable()
   class Interceptor implements NestInterceptor {
     fileInterceptor: NestInterceptor;
@@ -31,10 +29,7 @@ function LocalFilesInterceptor(
         limits: options.limits,
       };
 
-      this.fileInterceptor = new (FileInterceptor(
-        options.fieldName,
-        multerOptions,
-      ))();
+      this.fileInterceptor = new (FileInterceptor(options.fieldName, multerOptions))();
     }
 
     intercept(...args: Parameters<NestInterceptor['intercept']>) {

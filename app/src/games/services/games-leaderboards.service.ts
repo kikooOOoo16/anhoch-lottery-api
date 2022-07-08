@@ -15,10 +15,7 @@ export class GamesLeaderboardsService {
     private readonly gameLeaderboardModel: Model<GameLeaderboardDocument>,
   ) {}
 
-  async createLeaderboardForGame(
-    game: GameDocument,
-    dateTimestamp: number,
-  ): Promise<GameLeaderboardDocument> {
+  async createLeaderboardForGame(game: GameDocument, dateTimestamp: number): Promise<GameLeaderboardDocument> {
     let newLeaderboard: GameLeaderboardDocument;
     const gameLeaderboard = new this.gameLeaderboardModel({
       game,
@@ -35,10 +32,7 @@ export class GamesLeaderboardsService {
     return newLeaderboard;
   }
 
-  async deleteLeaderboardForGame(
-    game: GameDocument,
-    dateTimestamp: number,
-  ): Promise<GameLeaderboardDocument> {
+  async deleteLeaderboardForGame(game: GameDocument, dateTimestamp: number): Promise<GameLeaderboardDocument> {
     try {
       return await this.gameLeaderboardModel.findOneAndDelete({
         game,
@@ -55,10 +49,7 @@ export class GamesLeaderboardsService {
     userScore: UserScoreDocument,
   ): Promise<GameLeaderboardDocument> {
     if (gameLeaderboard.userScores) {
-      gameLeaderboard.userScores = [
-        ...gameLeaderboard.userScores,
-        userScore.id,
-      ];
+      gameLeaderboard.userScores = [...gameLeaderboard.userScores, userScore.id];
     } else {
       gameLeaderboard.userScores = [userScore.id];
     }

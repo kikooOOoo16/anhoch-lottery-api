@@ -17,5 +17,4 @@ export class GameLeaderboard {
   userScores: UserScore[];
 }
 
-export const GameLeaderboardSchema =
-  SchemaFactory.createForClass(GameLeaderboard);
+export const GameLeaderboardSchema = SchemaFactory.createForClass(GameLeaderboard);
