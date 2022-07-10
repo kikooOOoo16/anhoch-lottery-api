@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -29,34 +28,7 @@ import LocalFilesInterceptor from '../../interceptors/local-files.interceptor';
 import { ProfileImageDocument } from '../models/profile-image.model';
 import { createReadStream } from 'fs';
 import { CoverImageDocument } from '../models/cover-image.model';
-
-const profileImageStorageOptions = {
-  fieldName: 'profile-image',
-  path: '/profile-images',
-  fileFilter: (req, file, callback) => {
-    if (!file.mimetype.includes('image')) {
-      return callback(new BadRequestException('File must be an image'), false);
-    }
-    callback(null, true);
-  },
-  limits: {
-    fileSize: Math.pow(1024, 2),
-  },
-};
-
-const coverImageStorageOptions = {
-  fieldName: 'cover-image',
-  path: '/cover-images',
-  fileFilter: (req, file, callback) => {
-    if (!file.mimetype.includes('image')) {
-      return callback(new BadRequestException('File must be an image'), false);
-    }
-    callback(null, true);
-  },
-  limits: {
-    fileSize: Math.pow(1024, 2),
-  },
-};
+import { coverImageStorageOptions, profileImageStorageOptions } from '../../common/storage-options/storage-options';
 
 @Controller('user')
 export class UsersController {

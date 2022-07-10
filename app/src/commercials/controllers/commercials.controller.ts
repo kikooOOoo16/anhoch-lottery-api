@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -25,24 +24,22 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Response } from 'express';
 import { UpdateCommercialDTO } from '../dtos/update-commercial.dto';
-
-const commercialVideoStorageOptions = {
-  fieldName: 'commercial-video',
-  path: '/commercial-videos',
-  fileFilter: (req, file, callback) => {
-    if (!file.mimetype.includes('video')) {
-      return callback(new BadRequestException('File must be a video'), false);
-    }
-    callback(null, true);
-  },
-  limits: {
-    fileSize: Math.pow(5024, 2),
-  },
-};
+import { CreateCommercialStatisticsDTO } from '../dtos/create-commercial-statistics.dto';
+import { CommercialStatisticsService } from '../services/commercial-statistics.service';
+import { CurrentUser } from '../../users/decorators/current-user.decorator';
+import { UserDocument } from '../../users/models/user.model';
+import { CommercialStatistic, CommercialStatisticDocument } from '../models/commercial-statistic.model';
+import { CommercialStatisticDTO } from '../dtos/commercial-statistic.dto';
+import { SerializeDataInterceptor } from '../../interceptors/serialize-data.interceptor';
+import { CommercialStatisticByDateDTO } from '../dtos/commercial-statistic-by-date.dto';
+import { commercialVideoStorageOptions } from '../../common/storage-options/storage-options';
 
 @Controller('commercial')
 export class CommercialsController {
-  constructor(private commercialsService: CommercialsService) {}
+  constructor(
+    private commercialsService: CommercialsService,
+    private commercialStatisticsService: CommercialStatisticsService,
+  ) {}
 
   @Get('')
   @UseGuards(UserActiveSessionGuard)
@@ -84,6 +81,16 @@ export class CommercialsController {
     return await this.commercialsService.modifyWatchDuration(modifyCommercialsWatchDurationDTO);
   }
 
+  @Post('/statistics/add')
+  @UseGuards(UserActiveSessionGuard)
+  @UseInterceptors(new SerializeDataInterceptor(CommercialStatisticDTO))
+  async addCommercialStatistics(
+    @Body() createCommercialStatisticsDTO: CreateCommercialStatisticsDTO,
+    @CurrentUser() user: UserDocument,
+  ): Promise<CommercialStatistic> {
+    return await this.commercialStatisticsService.addCommercialStatistics(user, createCommercialStatisticsDTO);
+  }
+
   @Patch('/:id')
   @UseGuards(AdminActiveSessionGuard)
   async updateCommercial(
@@ -91,6 +98,24 @@ export class CommercialsController {
     @Body() updateCommercialDTO: UpdateCommercialDTO,
   ): Promise<CommercialDocument> {
     return await this.commercialsService.update(commercialId, updateCommercialDTO);
+  }
+
+  @Get('/:id/statistics/all')
+  @UseGuards(AdminActiveSessionGuard)
+  async getCommercialStatistics(@Param('id') commercialId: string): Promise<CommercialStatisticDocument[]> {
+    return await this.commercialStatisticsService.getAllStatisticsForCommercial(commercialId);
+  }
+
+  @Get('/:id/statistics/date')
+  @UseGuards(AdminActiveSessionGuard)
+  async getCommercialStatisticsForDate(
+    @Param('id') commercialId: string,
+    @Body() commercialStatisticByDateDTO: CommercialStatisticByDateDTO,
+  ): Promise<CommercialStatisticDocument[]> {
+    return await this.commercialStatisticsService.getAllStatisticsForCommercialByDate(
+      commercialId,
+      commercialStatisticByDateDTO,
+    );
   }
 
   @Patch('/:id/status')

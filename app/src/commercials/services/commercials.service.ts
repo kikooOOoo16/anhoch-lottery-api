@@ -100,6 +100,25 @@ export class CommercialsService {
     return foundCommercial;
   }
 
+  async findByFileName(filename: string): Promise<CommercialDocument> {
+    let foundCommercial: CommercialDocument;
+
+    try {
+      foundCommercial = await this.commercialModel.findOne({
+        filename,
+      });
+    } catch (e) {
+      Logger.error(e, 'commercials.service: findByFileName');
+      throw new ProblemRetrievingCommercialException();
+    }
+
+    if (!foundCommercial) {
+      throw new NoCommercialVideoFoundException();
+    }
+
+    return foundCommercial;
+  }
+
   async getAll(): Promise<CommercialDocument[]> {
     try {
       return await this.commercialModel.find({});

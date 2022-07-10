@@ -1,10 +1,16 @@
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
+import { CommercialStatistic } from './commercial-statistic.model';
 
 export type CommercialDocument = Document & Commercial;
 
 @Schema()
 export class Commercial {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'CommercialStatistic' })
+  @Type(() => CommercialStatistic)
+  commercialStatistics: CommercialStatistic[];
+
   @Prop({ required: true, unique: true })
   name: string;
 
