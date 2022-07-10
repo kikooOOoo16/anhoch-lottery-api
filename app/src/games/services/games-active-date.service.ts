@@ -1,128 +1,135 @@
-import {Injectable, Logger} from "@nestjs/common";
-import {GameDocument} from "../models/game.model";
-import {ActiveDateDocument} from "../models/active-date.model";
-import {ProblemRetrievingActiveDateException} from "../../exceptions/game-related/active-date/problem-retrieving-active-date.exception";
-import {GameAlreadySetAsActiveForDateException} from "../../exceptions/game-related/active-date/game-already-set-as-active-for-date.exception";
-import {AnotherGameActiveForDateException} from "../../exceptions/game-related/active-date/another-game-active-for-date.exception";
-import {ModifyActiveGameDateDTO} from "../dtos/modify-active-game-date.dto";
-import {SelectedGameNotInActivePoolException} from "../../exceptions/game-related/active-game-pool/selected-game-not-in-active-pool.exception";
-import {ProblemSettingActiveDateForGameException} from "../../exceptions/game-related/active-date/problem-setting-active-date-for-game.exception";
-import {NoActiveDateFoundException} from "../../exceptions/game-related/active-date/no-active-date-found.exception";
-import {ProvidedDateHasPassedException} from "../../exceptions/game-related/active-date/provided-date-has-passed.exception";
-import {InjectModel} from "@nestjs/mongoose";
-import {Model} from "mongoose";
-import {GamesFindService} from "./games-find.service";
-import {HelperService} from "../../common/services/helper.service";
-import {GamesLeaderboardsService} from "./games-leaderboards.service";
-import {GameLeaderboardDocument} from "../models/game-leaderboard.model";
-import {GamesService} from "./games.service";
+import { Injectable, Logger } from '@nestjs/common';
+import { GameDocument } from '../models/game.model';
+import { ActiveDateDocument } from '../models/active-date.model';
+import { ProblemRetrievingActiveDateException } from '../../exceptions/game-related/active-date/problem-retrieving-active-date.exception';
+import { GameAlreadySetAsActiveForDateException } from '../../exceptions/game-related/active-date/game-already-set-as-active-for-date.exception';
+import { AnotherGameActiveForDateException } from '../../exceptions/game-related/active-date/another-game-active-for-date.exception';
+import { ModifyActiveGameDateDTO } from '../dtos/modify-active-game-date.dto';
+import { SelectedGameNotInActivePoolException } from '../../exceptions/game-related/active-game-pool/selected-game-not-in-active-pool.exception';
+import { ProblemSettingActiveDateForGameException } from '../../exceptions/game-related/active-date/problem-setting-active-date-for-game.exception';
+import { NoActiveDateFoundException } from '../../exceptions/game-related/active-date/no-active-date-found.exception';
+import { ProvidedDateHasPassedException } from '../../exceptions/game-related/active-date/provided-date-has-passed.exception';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { GamesFindService } from './games-find.service';
+import { HelperService } from '../../common/services/helper.service';
+import { GamesLeaderboardsService } from './games-leaderboards.service';
+import { GameLeaderboardDocument } from '../models/game-leaderboard.model';
+import { GamesService } from './games.service';
 
 @Injectable()
 export class GamesActiveDateService {
+  constructor(
+    @InjectModel('ActiveDate')
+    private readonly activeDateModel: Model<ActiveDateDocument>,
+    private gamesService: GamesService,
+    private gamesFindService: GamesFindService,
+    private gamesLeaderboardsService: GamesLeaderboardsService,
+  ) {}
 
-    constructor(@InjectModel('ActiveDate') private readonly  activeDateModel: Model<ActiveDateDocument>,
-                private gamesService: GamesService,
-                private gamesFindService: GamesFindService,
-                private gamesLeaderboardsService: GamesLeaderboardsService) {
+  async findIfAnyGameIsActiveOnDate(game: GameDocument, timestamp): Promise<void> {
+    let foundDate: ActiveDateDocument;
+
+    try {
+      foundDate = await this.activeDateModel
+        .findOne({
+          date: timestamp,
+        })
+        .populate('game')
+        .exec();
+    } catch (e) {
+      Logger.error(e, 'games.service.ts: findIfGameIsActiveOnDate()');
+      throw new ProblemRetrievingActiveDateException();
     }
 
-    async findIfAnyGameIsActiveOnDate(game: GameDocument, timestamp): Promise<void> {
-        let foundDate: ActiveDateDocument;
+    if (foundDate && foundDate.game.name === game.name) {
+      const receivedDate = new Date(timestamp);
+      throw new GameAlreadySetAsActiveForDateException(receivedDate);
+    } else if (foundDate) {
+      Logger.debug(`The game ${foundDate.game.name} is already set on the date - ${new Date(timestamp)}`);
+      throw new AnotherGameActiveForDateException(foundDate.game.name, new Date(timestamp));
+    }
+  }
 
-        try {
-            foundDate = await this.activeDateModel
-                .findOne({
-                    date: timestamp
-                })
-                .populate('game')
-                .exec();
-        } catch (e) {
-            Logger.error(e, 'games.service.ts: findIfGameIsActiveOnDate()');
-            throw new ProblemRetrievingActiveDateException();
-        }
+  async setActiveDate(id, { day, month, year }: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
+    const game: GameDocument = await this.gamesFindService.findById(id);
+    let savedActiveDate: ActiveDateDocument;
 
-        if (foundDate && foundDate.game.name === game.name) {
-            const receivedDate = new Date(timestamp);
-            throw new GameAlreadySetAsActiveForDateException(receivedDate);
-        } else if (foundDate) {
-            Logger.debug(`The game ${foundDate.game.name} is already set on the date - ${new Date(timestamp)}`);
-            throw new AnotherGameActiveForDateException(foundDate.game.name, new Date(timestamp));
-        }
+    if (!game.inActivePool) {
+      throw new SelectedGameNotInActivePoolException();
     }
 
-    async setActiveDate(id, {day, month, year}: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
-        const game: GameDocument = await this.gamesFindService.findById(id);
-        let savedActiveDate: ActiveDateDocument;
+    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
 
-        if (!game.inActivePool) {
-            throw new SelectedGameNotInActivePoolException();
-        }
+    GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 
-        const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    await this.findIfAnyGameIsActiveOnDate(game, dateTimestamp);
 
-        GamesActiveDateService.checkIfDatePassed(dateTimestamp);
+    const activeDate = new this.activeDateModel({
+      date: dateTimestamp,
+      game,
+    });
 
-        await this.findIfAnyGameIsActiveOnDate(game, dateTimestamp);
-
-        const activeDate = new this.activeDateModel({
-            date: dateTimestamp,
-            game
-        });
-
-        try {
-            savedActiveDate = await activeDate.save();
-        } catch (e) {
-            Logger.error(e, 'games.service.ts: setActiveDate()');
-            throw new ProblemSettingActiveDateForGameException();
-        }
-
-        const gameLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.createLeaderboardForGame(game, dateTimestamp);
-
-        await this.gamesService.addLeaderboardToGameLeaderboardsList(game, gameLeaderboard);
-
-        return savedActiveDate;
+    try {
+      savedActiveDate = await activeDate.save();
+    } catch (e) {
+      Logger.error(e, 'games.service.ts: setActiveDate()');
+      throw new ProblemSettingActiveDateForGameException();
     }
 
-    async removeActiveDate(id, {day, month, year}: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
-        let activeDate: ActiveDateDocument;
-        const game: GameDocument = await this.gamesFindService.findById(id);
+    const gameLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.createLeaderboardForGame(
+      game,
+      dateTimestamp,
+    );
 
-        const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    await this.gamesService.addLeaderboardToGameLeaderboardsList(game, gameLeaderboard);
 
-        GamesActiveDateService.checkIfDatePassed(dateTimestamp);
+    return savedActiveDate;
+  }
 
-        try {
-            activeDate = await this.activeDateModel
-                .findOneAndDelete({
-                    date: dateTimestamp,
-                    game
-                })
-                .populate('game')
-                .exec();
-        } catch (e) {
-            Logger.error(e, 'games.service.ts removeActiveDate()');
-            throw new ProblemRetrievingActiveDateException();
-        }
+  async removeActiveDate(id, { day, month, year }: ModifyActiveGameDateDTO): Promise<ActiveDateDocument> {
+    let activeDate: ActiveDateDocument;
+    const game: GameDocument = await this.gamesFindService.findById(id);
 
-        if (!activeDate) {
-            throw new NoActiveDateFoundException();
-        }
+    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
 
-        const deletedLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.deleteLeaderboardForGame(game, dateTimestamp);
+    GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 
-        await this.gamesService.removeLeaderboardFromGame(game, deletedLeaderboard);
-
-        return activeDate;
+    try {
+      activeDate = await this.activeDateModel
+        .findOneAndDelete({
+          date: dateTimestamp,
+          game,
+        })
+        .populate('game')
+        .exec();
+    } catch (e) {
+      Logger.error(e, 'games.service.ts removeActiveDate()');
+      throw new ProblemRetrievingActiveDateException();
     }
 
-    private static checkIfDatePassed(dateTimestamp: number) {
-        const today = new Date();
-        today.setHours(0, 0, 0,0);
-
-        const todayTimestamp = today.getTime();
-
-        if (dateTimestamp < todayTimestamp) {
-            throw new ProvidedDateHasPassedException(new Date(dateTimestamp));
-        }
+    if (!activeDate) {
+      throw new NoActiveDateFoundException();
     }
+
+    const deletedLeaderboard: GameLeaderboardDocument = await this.gamesLeaderboardsService.deleteLeaderboardForGame(
+      game,
+      dateTimestamp,
+    );
+
+    await this.gamesService.removeLeaderboardFromGame(game, deletedLeaderboard);
+
+    return activeDate;
+  }
+
+  private static checkIfDatePassed(dateTimestamp: number) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayTimestamp = today.getTime();
+
+    if (dateTimestamp < todayTimestamp) {
+      throw new ProvidedDateHasPassedException(new Date(dateTimestamp));
+    }
+  }
 }
