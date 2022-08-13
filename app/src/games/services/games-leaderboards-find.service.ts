@@ -23,7 +23,7 @@ export class GamesLeaderboardsFindService {
     try {
       return await this.gameLeaderboardModel
         .findOne({
-          date: HelperService.getCurrentDateTimestamp(),
+          date: HelperService.getCurrentDateTimeStamp(),
           game: todayActiveGame,
         })
         .populate('userScores')

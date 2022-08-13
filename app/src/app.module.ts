@@ -9,6 +9,7 @@ import { AdminsModule } from './admins/admins.module';
 import { GamesModule } from './games/games.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CommercialsModule } from './commercials/commercials.module';
+import { EmailModule } from './email/email.module';
 import * as Joi from '@hapi/joi';
 
 const cookieSession = require('cookie-session');
@@ -34,6 +35,7 @@ const configModuleOptions = {
     AdminsModule,
     GamesModule,
     CommercialsModule,
+    EmailModule,
   ],
   providers: [
     {

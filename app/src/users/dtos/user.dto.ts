@@ -1,8 +1,8 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 
 export class UserDTO {
   @Expose()
-  _id: string;
+  id: string;
 
   @Expose()
   firstName: string;
@@ -23,5 +23,11 @@ export class UserDTO {
   phone: string;
 
   @Expose()
+  isVerified: boolean;
+
+  @Expose()
   playedToday: boolean;
+
+  @Exclude()
+  password: string;
 }

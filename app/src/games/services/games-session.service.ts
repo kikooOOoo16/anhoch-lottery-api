@@ -66,7 +66,7 @@ export class GamesSessionService {
     const gameLeaderboard: GameLeaderboardDocument =
       await this.gamesLeaderboardsFindService.findLeaderboardByDateForGame(
         activeGameSession.game,
-        HelperService.getCurrentDateTimestamp(),
+        HelperService.getCurrentDateTimeStamp(),
       );
 
     const endTimestamp: number = new Date().getTime();

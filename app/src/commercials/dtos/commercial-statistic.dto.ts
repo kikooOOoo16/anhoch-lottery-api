@@ -2,7 +2,7 @@ import { Expose, Transform } from 'class-transformer';
 
 export class CommercialStatisticDTO {
   @Expose()
-  _id: string;
+  id: string;
 
   @Transform(({ obj }) => obj.commercial._id)
   @Expose()

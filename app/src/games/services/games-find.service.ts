@@ -57,7 +57,7 @@ export class GamesFindService {
 
   async findActiveGameForToday(): Promise<GameDocument> {
     let activeDate: ActiveDateDocument;
-    const currentDateTimestamp = HelperService.getCurrentDateTimestamp();
+    const currentDateTimestamp = HelperService.getCurrentDateTimeStamp();
 
     try {
       activeDate = await this.activeDateModel.findOne({

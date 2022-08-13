@@ -23,7 +23,7 @@ export class CommercialStatisticsService {
   ): Promise<CommercialStatistic> {
     const commercial: CommercialDocument = await this.commercialsService.findByFileName(filename);
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    const dateTimestamp: number = HelperService.convertToTimeStamp(day, month, year);
 
     const newCommercialStatistic = new this.commercialStatisticModel({
       commercial,
@@ -58,7 +58,7 @@ export class CommercialStatisticsService {
   ): Promise<CommercialStatisticDocument[]> {
     const commercial: CommercialDocument = await this.commercialsService.findById(id);
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    const dateTimestamp: number = HelperService.convertToTimeStamp(day, month, year);
 
     try {
       return await this.commercialStatisticModel.find({
