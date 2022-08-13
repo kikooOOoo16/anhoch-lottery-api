@@ -59,7 +59,7 @@ export class GamesActiveDateService {
       throw new SelectedGameNotInActivePoolException();
     }
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    const dateTimestamp: number = HelperService.convertToTimeStamp(day, month, year);
 
     GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 
@@ -91,7 +91,7 @@ export class GamesActiveDateService {
     let activeDate: ActiveDateDocument;
     const game: GameDocument = await this.gamesFindService.findById(id);
 
-    const dateTimestamp: number = HelperService.convertToTimestamp(day, month, year);
+    const dateTimestamp: number = HelperService.convertToTimeStamp(day, month, year);
 
     GamesActiveDateService.checkIfDatePassed(dateTimestamp);
 

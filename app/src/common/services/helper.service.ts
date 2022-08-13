@@ -23,11 +23,11 @@ export class HelperService {
     }
   }
 
-  public static convertToTimestamp(day: number, month: number, year: number): number {
+  public static convertToTimeStamp(day: number, month: number, year: number): number {
     return new Date(year, month - 1, day).getTime();
   }
 
-  public static getCurrentDateTimestamp(): number {
+  public static getCurrentDateTimeStamp(): number {
     // return is 28.6.2022, 11:00:25 string
     const macedoniaTime = new Date().toLocaleString('de-DE', {
       timeZone: 'Europe/Belgrade',
@@ -44,7 +44,7 @@ export class HelperService {
     return new Date(+year, +month - 1, +day).getTime();
   }
 
-  public static formatTimestamp(timestamp: number): string {
+  public static formatTimeStamp(timestamp: number): string {
     let seconds: number | string = Math.floor((timestamp / 1000) % 60);
     let minutes: number | string = Math.floor((timestamp / (1000 * 60)) % 60);
     let hours: number | string = Math.floor((timestamp / (1000 * 60 * 60)) % 24);

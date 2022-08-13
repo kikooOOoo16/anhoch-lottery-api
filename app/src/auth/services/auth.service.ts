@@ -2,47 +2,91 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service';
 import { SignInDTO } from '../dtos/sign-in.dto';
 import { UserDocument } from '../../users/models/user.model';
-import { scrypt as _scrypt } from 'crypto';
-import { Buffer } from 'buffer';
-import { promisify } from 'util';
-import { WrongCredentialsException } from '../../exceptions/auth-related/wrong-credentials.exception';
 import { AdminsService } from '../../admins/services/admins.service';
 import { AdminDocument } from '../../admins/models/admin.model';
-
-// native scrypt doesn't work with promise
-const scrypt = promisify(_scrypt);
+import { EmailService } from '../../email/services/email.service';
+import { SecurityService } from './security.service';
+import { TokenDocument } from '../models/token.model';
+import { VerifyTokenDTO } from '../dtos/verify-token.dto';
+import { ForgotPasswordDTO } from '../dtos/forgot-password.dto';
+import { UserEmailNotVerifiedException } from '../../exceptions/user-related/user-email-not-verified.exception';
+import { TokenType } from '../enums/token-type.enum';
+import { ResetPasswordDTO } from '../dtos/reset-password.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService, private adminsService: AdminsService) {}
+  constructor(
+    private securityService: SecurityService,
+    private usersService: UsersService,
+    private adminsService: AdminsService,
+    private emailService: EmailService,
+  ) {}
 
-  async signUp(createUserDTO) {
-    return await this.usersService.create(createUserDTO);
-  }
+  async signUp(createUserDTO): Promise<UserDocument> {
+    const token: TokenDocument = await this.securityService.generateToken(TokenType.USER_WELCOME);
+    const user: UserDocument = await this.usersService.create(createUserDTO, token);
 
-  async signIn({ email, password }: SignInDTO) {
-    const user = await this.usersService.findByEmail(email);
-
-    await AuthService.validatePassword(user, password);
+    await this.emailService.sendVerificationEmail(
+      user.email,
+      user.firstName,
+      `${process.env.API_URL}/auth/verify-account?tokenId=${user.token.id}`,
+    );
 
     return user;
   }
 
-  async signInAdmin({ email, password }: SignInDTO) {
-    const admin = await this.adminsService.findByEmail(email);
+  async signIn({ email, password }: SignInDTO): Promise<UserDocument> {
+    const user: UserDocument = await this.usersService.findByEmail(email);
 
-    await AuthService.validatePassword(admin, password);
+    await SecurityService.validatePassword(user, password);
+
+    return user;
+  }
+
+  async signInAdmin({ email, password }: SignInDTO): Promise<AdminDocument> {
+    const admin: AdminDocument = await this.adminsService.findByEmail(email);
+
+    await SecurityService.validatePassword(admin, password);
 
     return admin;
   }
 
-  private static async validatePassword(account: UserDocument | AdminDocument, password: string) {
-    const [salt, storedHash] = account.password.split('.');
+  async verifyAccount({ tokenId }: VerifyTokenDTO): Promise<UserDocument> {
+    const user: UserDocument = await this.usersService.findByTokenId(tokenId, TokenType.USER_WELCOME);
 
-    const hash = (await scrypt(password, salt, 32)) as Buffer;
+    SecurityService.checkIfTokenExpired(user.token);
 
-    if (storedHash !== hash.toString('hex')) {
-      throw new WrongCredentialsException();
+    const updatedUser = await this.usersService.updateVerifyStatus(user);
+    await this.securityService.deleteTokenById(tokenId);
+
+    return updatedUser;
+  }
+
+  async initiateUserResetPassword({ email }: ForgotPasswordDTO) {
+    const user: UserDocument = await this.usersService.findByEmail(email);
+
+    if (!user.isVerified) {
+      throw new UserEmailNotVerifiedException();
     }
+
+    const token: TokenDocument = await this.securityService.generateToken(TokenType.USER_RESET_PASSWORD);
+    await this.usersService.setToken(user, token);
+
+    await this.emailService.sendResetPasswordEmail(
+      email,
+      `${process.env.API_URL}/auth/verify-reset-password-token?token-id=${token.id}`,
+    );
+  }
+
+  async verifyResetPasswordToken(tokenId: string): Promise<string> {
+    const user: UserDocument = await this.usersService.findByTokenId(tokenId, TokenType.USER_RESET_PASSWORD);
+    await this.usersService.updateUserResetPasswordTokenStatus(user);
+    return process.env.NG_APP_URL + '/reset-password';
+  }
+
+  async resetUserPassword({ email, password }: ResetPasswordDTO): Promise<void> {
+    const user: UserDocument = await this.usersService.findByEmail(email);
+    await this.securityService.verifyUsersTokenExpirationAndStatus(user);
+    await this.usersService.updateUserPassword(user, password);
   }
 }

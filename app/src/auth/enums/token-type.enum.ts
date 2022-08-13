@@ -1,0 +1,4 @@
+export enum TokenType {
+  USER_WELCOME = 'USER_WELCOME',
+  USER_RESET_PASSWORD = 'USER_RESET_PASSWORD',
+}

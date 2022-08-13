@@ -2,7 +2,7 @@ import { Expose, Transform } from 'class-transformer';
 
 export class GameUserScoreDTO {
   @Expose()
-  _id: string;
+  id: string;
 
   @Expose()
   time: number;

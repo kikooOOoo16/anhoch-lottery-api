@@ -2,10 +2,11 @@ import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ProfileImageDocument, ProfileImageSchema } from './profile-image.model';
 import { CoverImageDocument, CoverImageSchema } from './cover-image.model';
+import { TokenDocument, TokenSchema } from '../../auth/models/token.model';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
   firstName: string;
@@ -45,6 +46,12 @@ export class User {
 
   @Prop({ type: CoverImageSchema })
   coverImage: CoverImageDocument;
+
+  @Prop({ type: TokenSchema })
+  token: TokenDocument;
+
+  @Prop({ default: false })
+  isVerified: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
