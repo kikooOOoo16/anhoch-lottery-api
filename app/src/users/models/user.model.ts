@@ -21,17 +21,16 @@ export class User {
   })
   email: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
 
-  @Prop({ required: true })
+  @Prop()
   city: string;
 
-  @Prop({ required: true })
+  @Prop()
   age: number;
 
   @Prop({
-    required: true,
     unique: true,
   })
   phone: string;
@@ -52,6 +51,9 @@ export class User {
 
   @Prop({ default: false })
   isVerified: boolean;
+
+  @Prop({ default: false })
+  isRegisteredWithGoogle: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

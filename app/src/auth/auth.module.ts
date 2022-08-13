@@ -7,6 +7,8 @@ import { EmailModule } from '../email/email.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TokenSchema } from './models/token.model';
 import { SecurityService } from './services/security.service';
+import { GoogleAuthController } from './controllers/google-auth.controller';
+import { GoogleAuthService } from './services/google-auth.service';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { SecurityService } from './services/security.service';
     AdminsModule,
     EmailModule,
   ],
-  providers: [AuthService, SecurityService],
-  controllers: [AuthController],
+  providers: [AuthService, SecurityService, GoogleAuthService],
+  controllers: [AuthController, GoogleAuthController],
 })
 export class AuthModule {}

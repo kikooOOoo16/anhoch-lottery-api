@@ -16,6 +16,7 @@ import { TokenType } from '../../auth/enums/token-type.enum';
 import { ProblemSettingUserResetTokenException } from '../../exceptions/user-related/problem-setting-user-reset-token.exception';
 import { ProblemUpdatingResetPasswordTokenStatusException } from '../../exceptions/auth-related/problem-updating-reset-password-token-status.exception';
 import { ProblemResettingUserPasswordException } from '../../exceptions/user-related/problem-resetting-user-password.exception';
+import { oauth2_v2 } from 'googleapis';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +30,25 @@ export class UsersService {
       return await newUser.save();
     } catch (e) {
       Logger.error(e, 'users.service.ts: create()');
+      HelperService.handleDuplicateKeyErr(e);
+
+      throw new ProblemCreatingNewUserException();
+    }
+  }
+
+  async createWithGoogle(userData: oauth2_v2.Schema$Userinfo): Promise<UserDocument> {
+    const newUser: UserDocument = new this.userModel({
+      email: userData.email,
+      firstName: userData.name,
+      lastName: userData.family_name,
+      isVerified: true,
+      isRegisteredWithGoogle: true,
+    });
+
+    try {
+      return await newUser.save();
+    } catch (e) {
+      Logger.error(e, 'users.service: createWithGoogle()');
       HelperService.handleDuplicateKeyErr(e);
 
       throw new ProblemCreatingNewUserException();
